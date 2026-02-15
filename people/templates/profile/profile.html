@@ -74,7 +74,7 @@
                 <h2 class="text-2xl font-bold mb-6">Updates & Posts</h2>
 
                 <div class="space-y-6">
-                    <!-- Post 1 - Text Only -->
+                    {% for s in page %}
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <div class="flex items-center space-x-3 mb-4">
                             <div
@@ -82,107 +82,51 @@
                                 SJ
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                                <p class="text-sm text-gray-500">2 days ago</p>
+                                <h3 class="font-semibold text-gray-900">{{ user.username }}</h3>
+                                <p class="text-sm text-gray-500">{{ s.created_at|timesince }} ago</p>
                             </div>
                         </div>
-                        <p class="text-gray-700 leading-relaxed">
-                            Excited to announce that our new Machine Learning course has reached 10,000 students! Thank
-                            you
-                            all for your enthusiasm and dedication to learning. Keep up the great work! 🎉
+                        <p class="text-gray-700 leading-relaxed mb-4 whitespace-pre-wrap">
+                            {{s.text}}
                         </p>
+                        {% if s.image %}
+                        <img src={{ s.image.url }} alt="Status pic" class="w-full rounded-lg">
+                        {% endif %}
                     </div>
-
-                    <!-- Post 2 - With Image -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div
-                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                SJ
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                                <p class="text-sm text-gray-500">1 week ago</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 leading-relaxed mb-4">
-                            Had an amazing time at the AI Conference 2026 in San Francisco! Met incredible researchers
-                            and
-                            practitioners pushing the boundaries of what's possible with artificial intelligence. Here's
-                            a
-                            photo from my keynote on "Ethics in AI Development."
-                        </p>
-                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800"
-                            alt="Conference keynote" class="w-full rounded-lg">
-                    </div>
-
-                    <!-- Post 3 - Text Only -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div
-                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                SJ
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                                <p class="text-sm text-gray-500">2 weeks ago</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 leading-relaxed">
-                            New research paper published! "Improving Neural Network Interpretability Through Attention
-                            Mechanisms" is now available on arXiv. Check it out if you're interested in understanding
-                            how
-                            neural networks make decisions.
-                        </p>
-                    </div>
-
-                    <!-- Post 4 - With Image -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div
-                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                SJ
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                                <p class="text-sm text-gray-500">3 weeks ago</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 leading-relaxed mb-4">
-                            Beautiful day at MIT campus! Nothing beats working on AI research in this inspiring
-                            environment.
-                            Grateful for the opportunity to work with brilliant minds every day.
-                        </p>
-                        <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=800" alt="MIT campus"
-                            class="w-full rounded-lg">
-                    </div>
+                    {% empty %}
+                    <p>No status updates yet.</p>
+                    {% endfor %}
                 </div>
 
                 <!-- Pagination -->
                 <div class="mt-8 flex justify-center">
                     <nav class="flex items-center space-x-2">
-                        <a href="?page=1"
-                            class="px-3 py-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page.previous_page_number }}"
+                            class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
+                            Previous
                         </a>
-                        <a href="?page=1" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium">1</a>
-                        <a href="?page=2"
-                            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">2</a>
-                        <a href="?page=3"
-                            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">3</a>
-                        <span class="px-4 py-2 text-gray-500">...</span>
-                        <a href="?page=10"
-                            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">10</a>
-                        <a href="?page=2"
-                            class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
+                        {% endif %}
+
+                        {% for num in page.paginator.page_range %}
+                        {% if page.number == num %}
+                        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            {{ num }}
+                        </span>
+                        {% else %}
+                        <a href="?page={{ num }}"
+                            class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
+                            {{ num }}
                         </a>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page.next_page_number }}"
+                            class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
+                            Next
+                        </a>
+                        {% endif %}
                     </nav>
                 </div>
             </div>

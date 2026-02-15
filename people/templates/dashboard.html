@@ -16,22 +16,22 @@
                 <div class="flex items-center space-x-3">
                     <div
                         class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        JD
+                        {{ user.username|first|upper }}
                     </div>
-                    <button
+                    <a href="{% url 'status_edit' %}"
                         class="flex-1 text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition">
                         What's on your mind, John?
-                    </button>
+                    </a>
                 </div>
                 <div class="mt-4 pt-4 border-t">
-                    <button
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition">
+                    <a href="{% url 'status_edit' %}" class="block w-full text-center bg-blue-600 hover:bg-blue-700 
+                text-white font-medium py-2 px-4 rounded-lg transition">
                         Create Status
-                    </button>
+                    </a>
                 </div>
             </div>
 
-            <!-- Status Post 1 -->
+            {% for s in page %}
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center space-x-3 mb-4">
                     <div
@@ -39,72 +39,49 @@
                         MK
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">Michael Kim</h3>
-                        <p class="text-sm text-gray-500">2 hours ago</p>
+                        <h3 class="font-semibold text-gray-900">{{ user.username }}</h3>
+                        <p class="text-sm text-gray-500">{{ s.created_at|timesince }} ago</p>
                     </div>
                 </div>
-                <p class="text-gray-700 leading-relaxed">
-                    Just finished Module 3 of the Machine Learning course! The neural networks section was challenging
-                    but incredibly rewarding. Can't wait to apply these concepts in my final project. 🚀
+                <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {{s.text}}
                 </p>
+                {% if s.image %}
+                <img src={{ s.image.url }} alt="Status pic" class="w-full rounded-lg">
+                {% endif %}
             </div>
+            {% empty %}
+            <p>No status updates yet.</p>
+            {% endfor %}
 
-            <!-- Status Post 2 - With Image -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex items-center space-x-3 mb-4">
-                    <div
-                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        SJ
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                        <p class="text-sm text-gray-500">1 week ago</p>
-                    </div>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    Had an amazing time at the AI Conference 2026 in San Francisco! Met incredible researchers and
-                    practitioners pushing the boundaries of what's possible with artificial intelligence. Here's a photo
-                    from my keynote on "Ethics in AI Development."
-                </p>
-                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800" alt="Conference keynote"
-                    class="w-full rounded-lg">
-            </div>
-
-            <!-- Status Post 3 -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex items-center space-x-3 mb-4">
-                    <div
-                        class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        EP
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-900">Elena Petrova</h3>
-                        <p class="text-sm text-gray-500">3 days ago</p>
-                    </div>
-                </div>
-                <p class="text-gray-700 leading-relaxed">
-                    Does anyone have tips for the supervised learning assignment? I'm stuck on the regression analysis
-                    part. Would love to discuss approaches with fellow students!
-                </p>
-            </div>
 
             <!-- Pagination -->
-            <div class="flex justify-center space-x-2">
-                <button class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50 transition">
+            <div class="flex justify-center space-x-2 mt-6">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page.previous_page_number }}"
+                    class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
                     Previous
-                </button>
-                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                    1
-                </button>
-                <button class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50 transition">
-                    2
-                </button>
-                <button class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50 transition">
-                    3
-                </button>
-                <button class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                </a>
+                {% endif %}
+
+                {% for num in page.paginator.page_range %}
+                {% if page.number == num %}
+                <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                    {{ num }}
+                </span>
+                {% else %}
+                <a href="?page={{ num }}" class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page.next_page_number }}"
+                    class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
                     Next
-                </button>
+                </a>
+                {% endif %}
             </div>
         </div>
 

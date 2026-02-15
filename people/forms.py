@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, UserProfile
+from .models import User, UserProfile, Status
 
 
 class RegistrationForm(UserCreationForm):
@@ -62,6 +62,21 @@ class ProfileUpdateForm(forms.ModelForm):
                 'placeholder': 'Tell us about yourself...'
             }),
             'picture': forms.FileInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            })
+        }
+        
+class StatusForm(forms.ModelForm):
+    class Meta:
+        model = Status
+        fields = ["text", "image"]
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'rows': 5,
+                'placeholder': 'What is on your mind...'
+            }),
+            'image': forms.FileInput(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             })
         }

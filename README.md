@@ -244,4 +244,5 @@ This doesn't make sense. Deadlines shouldn't be publicily available and also hom
 - add edit profile(auth guarded) while view profile is not auth guarded
 
 # Status
-
+- Use model form since there is no processing needed.
+- add optional single file updload functionality and creaeted time is added for sorting.

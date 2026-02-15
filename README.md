@@ -203,3 +203,45 @@ display user status updates. These home pages should be discoverable and visible
 other users. 
 
 This doesn't make sense. Deadlines shouldn't be publicily available and also home page is the place where student or teacher manage their entire study, not for public. For this, I split profile and dashboard. Dashboard is only for owner, can see grades, deadlines, notification and progress and registered course. And profile, public and contain registered course, personal info and status.
+
+# UI Design
+/dashboard
+    - page for status update, viewing courses, deadline and grades for both student and teacher
+
+/courses
+    - page to explore and search courses
+/course/new
+    - page to create a new course
+/course/id
+    - page to explore view detail about the new course(un-enrolled)
+    - page to view the course material once you enroll(enrolled)
+/course/id/overview
+    - page to edit general information of the course(teacher)
+    - page to leave rating and un-enroll(student)
+/course/id/students
+    - page to search students and block, remove from course(teacher)
+/course/id/instructors
+    - page to search teacher and add as instructors(teacher)
+/course/id/material/id
+    - page to edit course content(teacher)
+    - page to view course content and mark as complete(student)
+
+/profile/id
+    - page to see and manage status, profile information
+
+/messages/id
+    - page to communicate between teacher and student
+    - page to create a whiteboard to draw 
+
+# Status file bucket
+
+# User, Profile and Authentication
+- Extend abstract user view and add a role field
+- Add profile, if no profile is there, user are redirected to profile pate, if not redirect to dashboard on login
+- use django forms to clean registered form.
+- use image field to store profile image.
+- add logout, and configure login/logout redirect url in setting as i am using django default auth classes.
+- add edit profile(auth guarded) while view profile is not auth guarded
+
+# Status
+

@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - ELearning{% endblock %}
+
+{% block content %}
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-80 bg-white border-r overflow-y-auto">
+        <div class="p-4">
+            <!-- Navigation Links -->
+            <div class="space-y-2 mb-6">
+                <a href="/course/overview" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="font-semibold">Course Overview</span>
+                </a>
+
+                <a href="/course/instructor" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="font-semibold">Instructor</span>
+                </a>
+
+                <a href="/course/students" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span class="font-semibold">Students</span>
+                </a>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Course Modules Section -->
+            <h2 class="text-lg font-bold mb-4 text-gray-700">Modules</h2>
+
+            <!-- Module 1 -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-200"
+                    onclick="toggleModule('module1')">
+                    <span class="font-semibold">Module 1: Introduction</span>
+                    <svg id="module1-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                <div id="module1-content" class="hidden ml-4 mt-2 space-y-1">
+                    <div class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm">Welcome Video</span>
+                        <span class="text-xs text-gray-500 ml-auto">Video</span>
+                    </div>
+                    <div class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="text-sm">Course Overview</span>
+                        <span class="text-xs text-gray-500 ml-auto">Reading</span>
+                    </div>
+                    <div class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-sm">Pre-assessment Quiz</span>
+                        <span class="text-xs text-gray-500 ml-auto">Quiz</span>
+                    </div>
+                    <button onclick="openMaterialModal('module1')"
+                        class="flex items-center space-x-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded w-full text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add Material</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Module 2 -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-200"
+                    onclick="toggleModule('module2')">
+                    <span class="font-semibold">Module 2: Python Basics</span>
+                    <svg id="module2-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                <div id="module2-content" class="hidden ml-4 mt-2 space-y-1">
+                    <div class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm">Variables and Data Types</span>
+                        <span class="text-xs text-gray-500 ml-auto">Video</span>
+                    </div>
+                    <div class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="text-sm">Control Flow Reading</span>
+                        <span class="text-xs text-gray-500 ml-auto">Reading</span>
+                    </div>
+                    <button onclick="openMaterialModal('module2')"
+                        class="flex items-center space-x-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded w-full text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add Material</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Module 3 -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-200"
+                    onclick="toggleModule('module3')">
+                    <span class="font-semibold">Module 3: ML Fundamentals</span>
+                    <svg id="module3-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                <div id="module3-content" class="hidden ml-4 mt-2 space-y-1">
+                    <div class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm">Introduction to ML</span>
+                        <span class="text-xs text-gray-500 ml-auto">Video</span>
+                    </div>
+                    <button onclick="openMaterialModal('module3')"
+                        class="flex items-center space-x-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded w-full text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add Material</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Module Button -->
+            <button onclick="openModuleModal()"
+                class="flex items-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add Module</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        {% block material %}
+        {% endblock %}
+    </main>
+</div>
+
+<!-- Add Module Modal -->
+<div id="moduleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold mb-6">Add New Module</h3>
+        <form onsubmit="event.preventDefault(); addModule();">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Module Name</label>
+                <input type="text" id="moduleName"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Module 4: Advanced Topics" required>
+            </div>
+            <div class="flex space-x-3">
+                <button type="submit"
+                    class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                    Add Module
+                </button>
+                <button type="button" onclick="closeModuleModal()"
+                    class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Material Modal -->
+<div id="materialModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold mb-6">Add New Material</h3>
+        <form onsubmit="event.preventDefault(); addMaterial();">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Material Name</label>
+                <input type="text" id="materialName"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Introduction to Neural Networks" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Material Type</label>
+                <select id="materialType"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required>
+                    <option value="">Select type...</option>
+                    <option value="video">Video</option>
+                    <option value="reading">Reading</option>
+                    <option value="quiz">Quiz</option>
+                </select>
+            </div>
+            <div class="flex space-x-3">
+                <button type="submit"
+                    class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                    Add Material
+                </button>
+                <button type="button" onclick="closeMaterialModal()"
+                    class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentModuleId = null;
+
+    function toggleModule(moduleId) {
+        const content = document.getElementById(`${moduleId}-content`);
+        const icon = document.getElementById(`${moduleId}-icon`);
+
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(-90deg)';
+        }
+    }
+
+    function openModuleModal() {
+        document.getElementById('moduleModal').classList.remove('hidden');
+    }
+
+    function closeModuleModal() {
+        document.getElementById('moduleModal').classList.add('hidden');
+        document.getElementById('moduleName').value = '';
+    }
+
+    function openMaterialModal(moduleId) {
+        currentModuleId = moduleId;
+        document.getElementById('materialModal').classList.remove('hidden');
+    }
+
+    function closeMaterialModal() {
+        document.getElementById('materialModal').classList.add('hidden');
+        document.getElementById('materialName').value = '';
+        document.getElementById('materialType').value = '';
+        currentModuleId = null;
+    }
+
+    function addModule() {
+        const moduleName = document.getElementById('moduleName').value;
+        console.log('Adding module:', moduleName);
+        // Add your module creation logic here
+        closeModuleModal();
+    }
+
+    function addMaterial() {
+        const materialName = document.getElementById('materialName').value;
+        const materialType = document.getElementById('materialType').value;
+        console.log('Adding material to', currentModuleId, ':', materialName, materialType);
+        // Add your material creation logic here
+        closeMaterialModal();
+    }
+</script>
+
+{% endblock %}

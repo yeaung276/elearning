@@ -43,7 +43,20 @@ class CourseForm(forms.ModelForm):
                 "type": "date",
                 "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
             }),
+            "status": forms.Select(attrs={
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            }),
         }
+    
+    def __init__(self, *args, show_status=False, disabled=False, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+        if not show_status:
+            self.fields.pop('status', None)
+        
+        if disabled:
+            for field in self.fields.values():
+                field.widget.attrs['disabled'] = 'disabled'
         
     def clean(self):
         cleaned = super().clean()

@@ -10,6 +10,11 @@ class Course(models.Model):
         ("marketing", "Marketing"),
         ("photography", "Photography"),
     ]
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('published', 'Published'),
+    ]
+    
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -33,6 +38,8 @@ class Course(models.Model):
     registration_end = models.DateField()
     course_start = models.DateField()
     course_end = models.DateField()
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     created_at = models.DateTimeField(auto_now_add=True)
 

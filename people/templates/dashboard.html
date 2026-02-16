@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load role_check %}
 
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
@@ -18,13 +19,13 @@
                         class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
                         {{ user.username|first|upper }}
                     </div>
-                    <a href="{% url 'status_edit' %}"
+                    <a href="{% url 'status' %}"
                         class="flex-1 text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition">
                         What's on your mind, John?
                     </a>
                 </div>
                 <div class="mt-4 pt-4 border-t">
-                    <a href="{% url 'status_edit' %}" class="block w-full text-center bg-blue-600 hover:bg-blue-700 
+                    <a href="{% url 'status' %}" class="block w-full text-center bg-blue-600 hover:bg-blue-700 
                 text-white font-medium py-2 px-4 rounded-lg transition">
                         Create Status
                     </a>
@@ -35,8 +36,8 @@
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center space-x-3 mb-4">
                     <div
-                        class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        MK
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                        {{ user.username|first|upper }}
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-900">{{ user.username }}</h3>
@@ -91,19 +92,21 @@
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-gray-900">My Courses</h2>
+                    {% if user|is_teacher %}
                     <a href="/course/new" class="text-sm font-medium text-blue-600 hover:text-blue-700">
                         + New Course
                     </a>
+                    {% endif %}
                 </div>
                 <div class="space-y-4">
+                    {% for c in courses %}
                     <!-- Course 1 -->
-                    <a href="/course/1" class="block hover:bg-gray-50 rounded-lg transition p-3 -m-3">
+                    <a href="{% url 'course' id=c.id %}" class="block hover:bg-gray-50 rounded-lg transition p-3 -m-3">
                         <div class="flex items-center space-x-4 mb-3">
-                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100" alt="Course"
-                                class="w-16 h-16 object-cover rounded flex-shrink-0">
+                            <img src="{{ c.cover_img.url|default:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100' }}"
+                                alt="Course" class="w-16 h-16 object-cover rounded flex-shrink-0">
                             <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 text-sm mb-1">Introduction to Machine Learning
-                                    and AI</h3>
+                                <h3 class="font-semibold text-gray-900 text-sm mb-1">{{c.title}}</h3>
                                 <div class="flex items-center space-x-3 text-xs text-gray-600">
                                     <span class="flex items-center">
                                         <svg class="w-3 h-3 text-yellow-400 fill-current mr-1" viewBox="0 0 20 20">
@@ -116,6 +119,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% if user|is_student %}
                         <div class="space-y-1">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Progress</span>
@@ -125,67 +129,9 @@
                                 <div class="bg-blue-600 h-2 rounded-full" style="width: 65%"></div>
                             </div>
                         </div>
+                        {% endif %}
                     </a>
-
-                    <!-- Course 2 -->
-                    <a href="/course/2" class="block hover:bg-gray-50 rounded-lg transition p-3 -m-3">
-                        <div class="flex items-center space-x-4 mb-3">
-                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=100" alt="Course"
-                                class="w-16 h-16 object-cover rounded flex-shrink-0">
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 text-sm mb-1">Web Development Bootcamp</h3>
-                                <div class="flex items-center space-x-3 text-xs text-gray-600">
-                                    <span class="flex items-center">
-                                        <svg class="w-3 h-3 text-yellow-400 fill-current mr-1" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        4.9
-                                    </span>
-                                    <span>8,234 students</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Progress</span>
-                                <span class="font-semibold text-blue-600">42%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 42%"></div>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Course 3 -->
-                    <a href="/course/3" class="block hover:bg-gray-50 rounded-lg transition p-3 -m-3">
-                        <div class="flex items-center space-x-4 mb-3">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=100" alt="Course"
-                                class="w-16 h-16 object-cover rounded flex-shrink-0">
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 text-sm mb-1">Data Science Fundamentals</h3>
-                                <div class="flex items-center space-x-3 text-xs text-gray-600">
-                                    <span class="flex items-center">
-                                        <svg class="w-3 h-3 text-yellow-400 fill-current mr-1" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        4.7
-                                    </span>
-                                    <span>15,672 students</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Progress</span>
-                                <span class="font-semibold text-blue-600">88%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 88%"></div>
-                            </div>
-                        </div>
-                    </a>
+                    {% endfor %}
                 </div>
             </div>
 

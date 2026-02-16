@@ -89,6 +89,7 @@ DATABASES = {
 AUTH_USER_MODEL = 'people.User'
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
+LOGIN_URL = "/login/"
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

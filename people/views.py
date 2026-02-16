@@ -1,7 +1,9 @@
+from rest_framework.decorators import api_view, renderer_classes
+from django.contrib.auth.decorators import login_required
+from rest_framework.renderers import TemplateHTMLRenderer
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
@@ -11,25 +13,27 @@ from django.http import Http404
 
 from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
 from .models import UserProfile, Status
+from course.models import Course
 
 
 User = get_user_model()
 
 # ============ Dashboard ===================
 @api_view(["GET"])
+@login_required(login_url='/login/')
+@renderer_classes([TemplateHTMLRenderer])
 def dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect("login")
-
     if not UserProfile.objects.filter(user=request.user).exists():
         return redirect("profile_edit")
 
-    status = Status.objects.filter(user=request.user).order_by("-created_at")
+    page = Paginator(
+        Status.objects.filter(user=request.user).order_by("-created_at"), 5
+    ).get_page(request.GET.get("page"))
+    
+    courses = Course.objects.filter(user=request.user).all()
 
-    paginator = Paginator(status, 5)
-    page_number = request.GET.get("page")
-    page = paginator.get_page(page_number)
-    return render(request, "dashboard.html", {"page": page})
+    
+    return render(request, "dashboard.html", {"page": page, "courses": courses })
 
 # ============= Authentication ===============
 class RegisterView(View):
@@ -50,6 +54,7 @@ class RegisterView(View):
 # ============== Profile ====================
 # Public route
 @api_view(["GET"])
+@renderer_classes([TemplateHTMLRenderer])
 def profile(request, id: int):
     user = get_object_or_404(User, id=id)
     profile = getattr(user, "userprofile", None)
@@ -61,7 +66,10 @@ def profile(request, id: int):
     paginator = Paginator(status, 5)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
-    return render(request, "profile/profile.html", {"profile": profile, "page": page})
+    return render(request, "profile/profile.html", {
+        "profile": profile, 
+        "page": page
+    })
 
 
 
@@ -83,12 +91,12 @@ class ProfileEditView(View, LoginRequiredMixin):
             profile = form.save(commit=False)
             profile.user = request.user
             profile.save()
-            return redirect("profile_me")
+            return redirect("profile", id=request.user.id)
 
         return render(request, "profile/edit.html", {"form": form})
 
 # ============== Status ======================
-class StatusEditView(View, LoginRequiredMixin):
+class StatusView(View, LoginRequiredMixin):
     login_url = "login"
     redirect_field_name = None
     

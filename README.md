@@ -246,3 +246,14 @@ This doesn't make sense. Deadlines shouldn't be publicily available and also hom
 # Status
 - Use model form since there is no processing needed.
 - add optional single file updload functionality and creaeted time is added for sorting.
+- Use django paginator class to auto-paginate the status in both dashbaord and profile.
+
+# Course
+- Course create, just use modelform because it is streightforward.
+- Add custom authenticator class to limit access only to student for course create.
+- Use is_teacher template tag to demonstrate template tags and hide/display certain UI dependin gon the user role
+- Use can_enroll template tag to display/hide enroll button based on role, registration date.
+
+# Enrollment
+- To handle block, we add status, if status is block, we don't allow user to access. And duplicated enrollemnts are also rejected
+- To handle batch, we add expired at. if enrollment is expired they can refresh the enrollment again. and if not they cannot access course materials.

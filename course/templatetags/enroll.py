@@ -7,10 +7,21 @@ register = template.Library()
 
 @register.filter
 def can_enroll(course, user):
+    if not user.is_authenticated:
+        return False
+    
+    if hasattr(user, 'role') and user.role == 'teacher':
+        return False
+    
     today = date.today()
-    not_teacher = not (hasattr(user, 'role') and user.role == 'teacher')
-    is_in_registration_period = course.registration_start <= today <= course.registration_end
+    if not (course.registration_start <= today <= course.registration_end):
+        return False
+
     enrollment = Enrollment.objects.filter(user=user, course=course).first()
-    not_block = enrollment is None or enrollment.status != "blocked"
-    not_enrolled = enrollment is None or enrollment.expired_at < today
-    return not_teacher and is_in_registration_period and not_block and not_enrolled
+    if enrollment is None:
+        return True
+    
+    if enrollment.status == "blocked":
+        return False
+    
+    return enrollment.expired_at is not None and enrollment.expired_at < today

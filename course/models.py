@@ -57,3 +57,10 @@ class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="enrollments")
     expired_at = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    
+class Instructor(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="instructors")

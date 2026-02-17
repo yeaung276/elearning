@@ -6,10 +6,11 @@ from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect
+from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth import login
+from django.db.models import Q
 from django.views import View
-from django.http import Http404
 
 from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
 from .models import UserProfile, Status
@@ -30,7 +31,11 @@ def dashboard(request):
         Status.objects.filter(user=request.user).order_by("-created_at"), 5
     ).get_page(request.GET.get("page"))
     
-    courses = Course.objects.filter(user=request.user).all()
+    courses = Course.objects.filter(
+        Q(user=request.user) |                          # Own course 
+        Q(enrollments__user=request.user) |             # Enrolled course
+        Q(instructors__user=request.user)               # Instructor cause
+    ).distinct()
 
     
     return render(request, "dashboard.html", {"page": page, "courses": courses })
@@ -63,15 +68,54 @@ def profile(request, id: int):
 
     status = Status.objects.filter(user=request.user).order_by("-created_at")
 
+    courses = Course.objects.filter(
+        Q(user=request.user) |                          # Own course 
+        Q(enrollments__user=request.user) |             # Enrolled course
+        Q(instructors__user=request.user)               # Instructor cause
+    ).distinct()
+    
     paginator = Paginator(status, 5)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(request, "profile/profile.html", {
         "profile": profile, 
-        "page": page
+        "page": page,
+        "courses": courses
     })
 
+# Protected route
+@api_view(["GET"])
+@login_required(login_url="/login/")
+def search_user(request):
+    if request.user.role != "teacher":
+        return JsonResponse({"error": "Only teachers can access this endpoint"}, status=403)
+    
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []}, status=200)
+    
+    users = User.objects.filter(
+        role=request.GET.get('role', 'teacher')
+    ).filter(
+        Q(username__icontains=query) | 
+        Q(userprofile__name__icontains=query)
+    ).select_related('userprofile').distinct()[:10]
+    
+    results = []
+    for user in users:
+        try:
+            profile = user.userprofile # type: ignore
+            results.append({
+                'id': user.id, # type: ignore
+                'name': profile.name,
+                'profile_img': request.build_absolute_uri(profile.picture.url) if profile.picture else None,
+                'title': profile.title
+            })
+        except User.userprofile.RelatedObjectDoesNotExist: # type: ignore
+            continue
 
+    return JsonResponse({'results': results}, status=200)
+    
 
 # Protected route
 class ProfileEditView(View, LoginRequiredMixin):

@@ -257,3 +257,7 @@ This doesn't make sense. Deadlines shouldn't be publicily available and also hom
 # Enrollment
 - To handle block, we add status, if status is block, we don't allow user to access. And duplicated enrollemnts are also rejected
 - To handle batch, we add expired at. if enrollment is expired they can refresh the enrollment again. and if not they cannot access course materials.
+# Instructor
+- Instructor page, only accessible by course owner
+- Instructor has same previlidge as enrolled student, but can't modify the contents. 
+- Additional priviledge is it can search student

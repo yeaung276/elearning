@@ -1,0 +1,217 @@
+{% extends "materials/sidebar.html" %}
+
+{% block material %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white rounded-lg shadow-sm p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Manage Instructors</h2>
+        <p class="text-gray-600">Add or remove instructors for this course</p>
+    </div>
+
+    <!-- Search Section -->
+    <section class="bg-white rounded-lg shadow-sm p-8">
+        <h3 class="text-xl font-bold mb-6">Add Instructor</h3>
+
+        <div class="relative">
+            <label for="instructor-search" class="block text-sm font-semibold text-gray-700 mb-2">
+                Search for Teachers
+            </label>
+            <div class="relative">
+                <input type="text" id="instructor-search" placeholder="Type instructor name to search..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    autocomplete="off">
+                <div class="absolute right-3 top-3 text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Search Results Dropdown -->
+            <div id="search-results"
+                class="hidden absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                <!-- Loading -->
+                <div id="loading-state" class="hidden p-4 text-center text-gray-500">
+                    <svg class="animate-spin h-6 w-6 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <p>Searching...</p>
+                </div>
+
+                <!-- No Results -->
+                <div id="no-results" class="hidden p-4 text-center text-gray-500">
+                    No instructors found
+                </div>
+
+                <!-- Results List -->
+                <div id="results-list" class="divide-y divide-gray-100">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instructors Section -->
+    <section class="bg-white rounded-lg shadow-sm p-8">
+        <h3 class="text-xl font-bold mb-6">Instructors</h3>
+
+        <div id="instructors-list" class="space-y-4">
+            {% for inst in instructors %}
+            <div class="instructor-item flex items-center justify-between border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition group">
+                <a href="{% url 'profile' id=inst.user.id %}" class="flex items-center space-x-4 flex-1">
+                    {% if inst.user.userprofile.picture %}
+                    <img src="{{ inst.user.userprofile.picture.url }}" alt="Profile picture" class="w-20 h-20 rounded-full object-cover">
+                    {% else %}
+                    <div
+                        class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                        {{ inst.user.username|first|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ inst.user.userprofile.name }}</h3>
+                        <p class="text-gray-600">{{ inst.user.userprofile.title }}</p>
+                        <p class="text-sm text-gray-500 mt-1">View Profile →</p>
+                    </div>
+                </a>
+                <button type="button"
+                    class="remove-instructor px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition opacity-0 group-hover:opacity-100"
+                    onclick="deleteInstructor({{ inst.id }})">
+                    Remove
+                </button>
+            </div>
+            {% empty %}
+            <!-- Empty State (show when no instructors) -->
+            <div id="empty-state" class="text-center py-12 text-gray-500">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <p class="text-lg font-medium">No instructors added yet</p>
+                <p class="text-sm mt-1">Use the search bar above to add instructors to this course</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<script>
+    // DOM Elements
+    const searchInput = document.getElementById('instructor-search');
+    const searchResults = document.getElementById('search-results');
+    const loadingState = document.getElementById('loading-state');
+    const noResults = document.getElementById('no-results');
+    const resultsList = document.getElementById('results-list');
+
+    // Debounce function
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Display search results
+    function showSearchResults(results) {
+        if (results.length === 0) {
+            showNoResults();
+            return;
+        }
+
+        resultsList.innerHTML = results.map(instructor => `
+            <form method="POST" action="{% url "instructor_overview" cid=course.id %}" class="w-full p-4 hover:bg-gray-50 transition cursor-pointer">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="${instructor.id}" />
+                <button 
+                    type="submit"
+                    class="w-full text-left instructor-result"
+                >
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full flex-shrink-0 overflow-hidden">
+                            ${instructor.profile_img
+                                ? `<img src="${instructor.profile_img}" alt="${instructor.name}" class="w-full h-full object-cover">`
+                                : `<div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                                    ${instructor.name.charAt(0).toUpperCase()}
+                                </div>`
+                            }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-base font-semibold text-gray-900 truncate">${instructor.name}</h4>
+                            <p class="text-sm text-gray-600 truncate">${instructor.title || 'Instructor'}</p>
+                        </div>
+                    </div>
+                </button>
+            </form>
+        `).join('');
+
+        searchResults.classList.remove('hidden');
+    }
+
+
+    // Show/hide states
+    function showLoading() {
+        searchResults.classList.remove('hidden');
+        loadingState.classList.remove('hidden');
+        noResults.classList.add('hidden');
+        resultsList.innerHTML = '';
+    }
+
+    function hideLoading() {
+        loadingState.classList.add('hidden');
+    }
+
+    function showNoResults() {
+        searchResults.classList.remove('hidden');
+        noResults.classList.remove('hidden');
+        resultsList.innerHTML = '';
+    }
+
+    function hideSearchResults() {
+        searchResults.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        noResults.classList.add('hidden');
+        resultsList.innerHTML = '';
+    }
+
+    async function deleteInstructor(instructorId) {
+        const response = await fetch("{% url 'instructor_overview' cid=course.id %}", {
+            method: "DELETE",
+            headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json" },
+            body: JSON.stringify({ instructor_id: instructorId }),
+        });
+
+        if (response.ok) {
+            window.location.reload()
+        }
+    }
+
+
+    searchInput.addEventListener('input', debounce(function (e) {
+        showLoading();
+        fetch(`{% url "search_user" %}?q=${encodeURIComponent(e.target.value)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then((r) => r.json())
+            .then((r) => showSearchResults(r.results || []))
+            .finally(() => hideLoading());
+
+
+    }, 500));
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            hideSearchResults();
+        }
+    });
+    document.querySelectorAll(".remove-instructor").forEach()
+</script>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load role_check %}
+{% load humanize %}
 
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
@@ -115,7 +116,7 @@
                                         </svg>
                                         4.8
                                     </span>
-                                    <span>12,459 students</span>
+                                    <span>{{ c.enrollments.count|intcomma }} students</span>
                                 </div>
                             </div>
                         </div>

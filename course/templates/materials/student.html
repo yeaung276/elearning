@@ -1,0 +1,119 @@
+{% extends "materials/sidebar.html" %}
+
+{% block material %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white rounded-lg shadow-sm p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Manage Students</h2>
+        <p class="text-gray-600">Search, block, or remove students from this course</p>
+    </div>
+
+    <!-- Search Section -->
+    <section class="bg-white rounded-lg shadow-sm p-8">
+        <h3 class="text-xl font-bold mb-6">Search Students</h3>
+        <form method="GET" action="">
+            <label for="student-search" class="block text-sm font-semibold text-gray-700 mb-2">
+                Search by Name
+            </label>
+            <div class="relative">
+                <input type="text" id="student-search" name="q" value="{{ request.GET.q }}"
+                    placeholder="Type student name and press Enter..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    autocomplete="off">
+                <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-blue-500 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Students List -->
+    <section class="bg-white rounded-lg shadow-sm p-8">
+        <h3 class="text-xl font-bold mb-6">
+            Students
+            {% if request.GET.q %}
+                <span class="text-base font-normal text-gray-500 ml-2">Results for "{{ request.GET.q }}"</span>
+            {% endif %}
+        </h3>
+
+        <div class="space-y-4">
+            {% for enrollment in enrollments %}
+            <div class="flex items-center justify-between border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition group {% if enrollment.status == 'blocked' %}opacity-60 bg-gray-50{% endif %}">
+                <a href="{% url 'profile' id=enrollment.user.id %}" class="flex items-center space-x-4 flex-1">
+                    {% if enrollment.user.userprofile.picture %}
+                    <img src="{{ enrollment.user.userprofile.picture.url }}" alt="Profile picture"
+                        class="w-20 h-20 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                        {{ enrollment.user.username|first|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-semibold text-gray-900">{{ enrollment.user.userprofile.name }}</h3>
+                            {% if enrollment.status == 'blocked' %}
+                            <span class="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-600 rounded-full">Blocked</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-gray-600">{{ enrollment.user.userprofile.title }}</p>
+                        <p class="text-sm text-gray-500 mt-1">View Profile →</p>
+                    </div>
+                </a>
+                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <button type="button"
+                        class="px-4 py-2 rounded-lg font-semibold transition {% if enrollment.blocked %}bg-yellow-50 text-yellow-600 hover:bg-yellow-100{% else %}bg-orange-50 text-orange-600 hover:bg-orange-100{% endif %}"
+                        onclick="toggleBlock({{ enrollment.id }}, {% if enrollment.status == 'blocked' %}true{% else %}false{% endif %})">
+                        {% if enrollment.status == 'blocked' %}Unblock{% else %}Block{% endif %}
+                    </button>
+                    <button type="button"
+                        class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition"
+                        onclick="removeStudent({{ enrollment.id }})">
+                        Remove
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-12 text-gray-500">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+                <p class="text-lg font-medium">No students found</p>
+                <p class="text-sm mt-1">
+                    {% if request.GET.q %}
+                        No results for "{{ request.GET.q }}". Try a different search.
+                    {% else %}
+                        No students are enrolled in this course yet.
+                    {% endif %}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<script>
+    async function toggleBlock(enrollmentId, isBlocked) {
+        const response = await fetch("{% url 'student_overview' cid=course.id %}", {
+            method: "PATCH",
+            headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json" },
+            body: JSON.stringify({ enrollment_id: enrollmentId, blocked: !isBlocked }),
+        });
+        if (response.ok) window.location.reload();
+    }
+
+    async function removeStudent(enrollmentId) {
+        const response = await fetch("{% url 'student_overview' cid=course.id %}", {
+            method: "DELETE",
+            headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json" },
+            body: JSON.stringify({ enrollment_id: enrollmentId }),
+        });
+        if (response.ok) window.location.reload();
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "materials/sidebar.html" %}
+
+{% block material %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white rounded-lg shadow-sm p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Rate This Course</h2>
+        <p class="text-gray-600">Share your experience with others</p>
+    </div>
+
+    <!-- Rating Form -->
+    <section class="bg-white rounded-lg shadow-sm p-8">
+        <form method="POST" action="{% url 'rating_overview' cid=course.id %}">
+            {% csrf_token %}
+
+            <!-- Star Rater -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">Your Rating</label>
+                <div class="flex gap-2">
+                    {% for i in "12345" %}
+                    <button type="button" data-value="{{ i }}"
+                        class="star text-4xl text-gray-300 hover:text-yellow-400 transition focus:outline-none">
+                        ★
+                    </button>
+                    {% endfor %}
+                </div>
+                {{ form.rating }}
+                {% if form.rating.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.rating.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Text Box -->
+            <div class="mb-8">
+                <label for="{{ form.text.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">Your Review</label>
+                {{ form.text }}
+                {% if form.text.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.text.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3">
+                <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                    Submit
+                </button>
+                <a href="{% url 'material_overview' cid=course.id %}"
+                    class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </section>
+</div>
+
+<script>
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('rating-input');
+
+    // pre-fill stars if editing existing rating
+    const existing = parseInt(ratingInput.value);
+    if (existing) highlight(existing);
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const value = parseInt(star.dataset.value);
+            ratingInput.value = value;
+            highlight(value);
+        });
+        star.addEventListener('mouseenter', () => highlight(parseInt(star.dataset.value)));
+        star.addEventListener('mouseleave', () => highlight(parseInt(ratingInput.value) || 0));
+    });
+
+    function highlight(value) {
+        stars.forEach(s => {
+            s.classList.toggle('text-yellow-400', parseInt(s.dataset.value) <= value);
+            s.classList.toggle('text-gray-300', parseInt(s.dataset.value) > value);
+        });
+    }
+</script>
+
+{% endblock %}

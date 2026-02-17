@@ -28,9 +28,9 @@
                                 <path
                                     d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                             </svg>
-                            <span class="ml-1 font-bold text-lg">4.8</span>
+                            <span class="ml-1 font-bold text-lg">{{ course.avg_rating }}</span>
                         </div>
-                        <span class="text-gray-300 text-sm">(2,847 ratings)</span>
+                        <span class="text-gray-300 text-sm">({{ course.rating_count|intcomma }} ratings)</span>
                     </div>
                     <div class="text-sm text-gray-300">{{ course.enrollments.count|intcomma }} students enrolled</div>
                 </div>
@@ -201,146 +201,38 @@
         <h2 class="text-2xl font-bold mb-6">Student Reviews</h2>
 
         <div class="space-y-6">
-            <!-- Review 1 -->
+            {% for r in course.ratings.all %}
             <div class="border-b pb-6">
                 <div class="flex items-start space-x-4">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                        MK
+                    {% if r.user.userprofile.picture %}
+                    <img src="{{ r.user.userprofile.picture.url }}" alt="Profile picture"
+                        class="w-12 h-12 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                        {{ r.user.username|first|upper }}
                     </div>
+                    {% endif %}
                     <div class="flex-1">
                         <div class="flex items-center justify-between mb-2">
                             <div>
-                                <h4 class="font-semibold">Michael Kim</h4>
+                                <h4 class="font-semibold">{{ r.user.userprofile.name }}</h4>
                                 <div class="flex items-center mt-1">
                                     <div class="flex">
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                        {% for i in "12345" %}
+                                        <svg class="w-4 h-4 fill-current {% if forloop.counter <= r.rating %}text-yellow-400{% else %}text-gray-300{% endif %}" viewBox="0 0 20 20">
+                                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                                         </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-sm text-gray-500">2 weeks ago</span>
+                            <span class="text-sm text-gray-500">{{ r.created_at|timesince }}</span>
                         </div>
-                        <p class="text-gray-700">Excellent course! The explanations are clear and the hands-on projects
-                            really helped solidify the concepts. Dr. Johnson is an amazing instructor who makes complex
-                            topics accessible.</p>
+                        <p class="text-gray-700 whitespace-pre-wrap">{{ r.text }}</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Review 2 -->
-            <div class="border-b pb-6">
-                <div class="flex items-start space-x-4">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                        EP
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-2">
-                            <div>
-                                <h4 class="font-semibold">Elena Petrova</h4>
-                                <div class="flex items-center mt-1">
-                                    <div class="flex">
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-sm text-gray-500">1 month ago</span>
-                        </div>
-                        <p class="text-gray-700">Great introduction to ML and AI. The course structure is well-organized
-                            and builds knowledge progressively. Would have liked more advanced topics, but overall very
-                            satisfied.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Review 3 -->
-            <div class="border-b pb-6">
-                <div class="flex items-start space-x-4">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                        RC
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-2">
-                            <div>
-                                <h4 class="font-semibold">Raj Chakraborty</h4>
-                                <div class="flex items-center mt-1">
-                                    <div class="flex">
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-sm text-gray-500">3 weeks ago</span>
-                        </div>
-                        <p class="text-gray-700">Perfect for beginners! I came in with zero ML experience and now I feel
-                            confident building my own models. The projects were challenging but rewarding. Highly
-                            recommend!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Show More Button -->
-            <button
-                class="w-full py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
-                Show More Reviews
-            </button>
+            {% endfor %}
         </div>
     </section>
 </div>

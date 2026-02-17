@@ -261,3 +261,9 @@ This doesn't make sense. Deadlines shouldn't be publicily available and also hom
 - Instructor page, only accessible by course owner
 - Instructor has same previlidge as enrolled student, but can't modify the contents. 
 - Additional priviledge is it can search student
+# Student
+- use the form both for search and only search within same batch enrolled in the course.
+- owner and instructor can block or remove
+- classmate can only view.
+# Rating
+- only student with active enrollment can create rating. they are aggregated

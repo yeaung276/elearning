@@ -2,7 +2,7 @@ import json
 from datetime import date
 
 from django.views import View
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 from django.utils.timezone import now
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -14,8 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .forms import CourseForm
-from .models import Course, Enrollment, Instructor
+from .forms import CourseForm, RatingForm
+from .models import Course, Enrollment, Instructor, Rating
 from people.mixin import TeacherRequiredMixin
 
 
@@ -38,7 +38,7 @@ def explore(request):
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
 def course_detail(request, id: int):
-    course = get_object_or_404(Course, id=id)
+    course = get_object_or_404(Course.objects.annotate(avg_rating=Avg("ratings__rating"), rating_count=Count("ratings__rating")), id=id)
 
     if request.user.is_authenticated:
         enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
@@ -136,14 +136,12 @@ class InstructorOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
         
         return JsonResponse({"ok": True})
     
-class StudentOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
+class StudentOverviewView(LoginRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     
     def get(self, request, cid: int):
         course = get_object_or_404(Course, id=cid)
-        if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
-            return redirect("material_overview", cid=course.id) # type: ignore
         enrollments = Enrollment.objects.filter(course=course)
         q = request.GET.get("q", "").strip()
         if q:
@@ -158,7 +156,7 @@ class StudentOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
     def patch(self, request, cid: int):
         course = get_object_or_404(Course, id=cid)
         if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
-            return redirect("material_overview", cid=course.id) # type: ignore
+            return JsonResponse({"error": "Only teacher can block or unblock a student."})
         data = json.loads(request.body)
         
         enrollment = get_object_or_404(Enrollment, id=data["enrollment_id"], course=course)
@@ -169,14 +167,49 @@ class StudentOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
     def delete(self, request, cid: int):
         course = get_object_or_404(Course, id=cid)
         if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
-            return redirect("material_overview", cid=course.id) # type: ignore
+            return JsonResponse({"error": "Only teacher can remove a student."}, status=401)
         
         data = json.loads(request.body)
         enrollment = get_object_or_404(Enrollment, id=data["enrollment_id"], course=course)
         enrollment.delete()
         return JsonResponse({"ok": True})
         
+class RatingOverviewView(LoginRequiredMixin, View):
+    login_url = "login"
+    redirect_field_name = None
     
+    def get(self, request, cid):
+        course = get_object_or_404(Course, id=cid)
+        enrollment = Enrollment.objects.filter(user=request.user, course=course).last()
+        if not is_enrolled(enrollment):
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        existing = Rating.objects.filter(user=request.user, course=course).last()
+        form = RatingForm(instance=existing)
+
+        return render(request, "materials/rating.html", {
+            "course": course,
+            "form": form,
+        })
+        
+    def post(self, request, cid):
+        course = get_object_or_404(Course, id=cid)
+        enrollment = Enrollment.objects.filter(user=request.user, course=course).last()
+        if not is_enrolled(enrollment):
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        existing = Rating.objects.filter(user=request.user, course=course).last()
+        form = RatingForm(request.POST, instance=existing)
+        if form.is_valid():
+            rating = form.save(commit=False)
+            rating.user = request.user
+            rating.course = course
+            rating.save()
+
+        return redirect("material_overview", cid=course.id) # type: ignore
+        
+        
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def enroll(request, id: int):

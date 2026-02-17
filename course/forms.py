@@ -1,5 +1,5 @@
 from django import forms
-from .models import Course
+from .models import Course, Rating
 
 
 class CourseForm(forms.ModelForm):
@@ -76,3 +76,36 @@ class CourseForm(forms.ModelForm):
             self.add_error("registration_end", "Registration must end before course starts.")
 
         return cleaned
+    
+    
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ["rating", "text"]
+
+        widgets = {
+            "rating": forms.HiddenInput(attrs={
+                "id": "rating-input",
+            }),
+            "text": forms.Textarea(attrs={
+                "rows": 5,
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none",
+                "placeholder": "Write your thoughts about this course...",
+            }),
+        }
+        
+    def clean_rating(self):
+        rating = self.cleaned_data.get("rating")
+        if rating is None:
+            raise forms.ValidationError("Please select a star rating.")
+        if not (1 <= rating <= 5):
+            raise forms.ValidationError("Rating must be between 1 and 5.")
+        return rating
+
+    def clean_text(self):
+        text = self.cleaned_data.get("text", "").strip()
+        if not text:
+            raise forms.ValidationError("Please write a review.")
+        if len(text) < 10:
+            raise forms.ValidationError("Review must be at least 10 characters.")
+        return text

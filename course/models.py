@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Course(models.Model):
     CATEGORY_CHOICES = [
@@ -64,3 +65,13 @@ class Instructor(models.Model):
         on_delete=models.CASCADE,
     )
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="instructors")
+    
+class Rating(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="ratings")
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,7 +1,5 @@
 from rest_framework.decorators import api_view, renderer_classes
-from django.contrib.auth.decorators import login_required
 from rest_framework.renderers import TemplateHTMLRenderer
-from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -9,7 +7,9 @@ from django.shortcuts import render, redirect
 from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth import login
-from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q, Avg
 from django.views import View
 
 from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
@@ -35,7 +35,7 @@ def dashboard(request):
         Q(user=request.user) |                          # Own course 
         Q(enrollments__user=request.user) |             # Enrolled course
         Q(instructors__user=request.user)               # Instructor cause
-    ).distinct()
+    ).annotate(avg_rating=Avg("ratings__rating")).distinct()
 
     
     return render(request, "dashboard.html", {"page": page, "courses": courses })
@@ -72,7 +72,7 @@ def profile(request, id: int):
         Q(user=request.user) |                          # Own course 
         Q(enrollments__user=request.user) |             # Enrolled course
         Q(instructors__user=request.user)               # Instructor cause
-    ).distinct()
+    ).annotate(avg_rating=Avg("ratings__rating")).distinct()
     
     paginator = Paginator(status, 5)
     page_number = request.GET.get("page")

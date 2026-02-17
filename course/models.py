@@ -75,3 +75,20 @@ class Rating(models.Model):
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+class Module(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="modules")
+    name =  models.CharField(max_length=20, blank=False)
+    
+class Material(models.Model):
+    class Type(models.TextChoices):
+        QUIZ = "quiz", "Quiz"
+        VIDEO = "video", "Video"
+        READING = "reading", "Reading"
+
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="materials")
+    name = models.CharField(max_length=200, blank=False)
+    due_date = models.DateField(null=True, blank=True)
+    type = models.CharField(max_length=10, choices=Type.choices, blank=False)
+    
+    

@@ -15,7 +15,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .forms import CourseForm, RatingForm
-from .models import Course, Enrollment, Instructor, Rating
+from .models import (
+    Course, 
+    Enrollment, 
+    Instructor, 
+    Rating, 
+    Module, 
+    Material
+)
 from people.mixin import TeacherRequiredMixin
 
 
@@ -208,7 +215,60 @@ class RatingOverviewView(LoginRequiredMixin, View):
 
         return redirect("material_overview", cid=course.id) # type: ignore
         
+class ModuleView(LoginRequiredMixin, TeacherRequiredMixin, View):
+    login_url = "login"
+    redirect_field_name = None
+    
+    def post(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if course.user != request.user:
+            return redirect("material_overview", cid=course.id) # type: ignore
         
+        name = request.POST.get("name", "").strip()
+        if name:
+            Module.objects.create(course=course, name=name)
+        return redirect("material_overview", cid=course.id) # type: ignore
+        
+    def delete(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if request.user != course.user:
+            return JsonResponse({"error": "Only owner can remove a module."}, status=401)
+        
+        data = json.loads(request.body)
+        module = get_object_or_404(Module, id=data["module_id"], course=course)
+        module.delete()
+        return JsonResponse({"ok": True})
+    
+class MaterialView(LoginRequiredMixin, TeacherRequiredMixin, View):
+    login_url = "login"
+    redirect_field_name = None
+    
+    def get(self, request, cid: int, mid: int):
+        ...
+    
+    def post(self, request, cid: int, mid: int):
+        course = get_object_or_404(Course, id=cid)
+        if course.user != request.user:
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        module = get_object_or_404(Module, id=request.POST.get("module_id"), course=course)
+        name = request.POST.get("name", "").strip()
+        type_ = request.POST.get("type", "").strip()
+
+        if name and type_ in Material.Type.values:
+            material = Material.objects.create(module=module, name=name, type=type_)
+            return redirect("material", cid=course.id, mid=material.id) # type: ignore
+
+        return redirect("material_overview", cid=course.id) # type: ignore
+        
+    def delete(self, request, cid: int, mid: int):
+        course = get_object_or_404(Course, id=cid)
+        if request.user != course.user:
+            return JsonResponse({"error": "Only owner can remove a material."}, status=401)
+
+        material = get_object_or_404(Material, id=mid, module__course=course)
+        material.delete()
+        return JsonResponse({"ok": True})
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

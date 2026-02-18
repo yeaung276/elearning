@@ -121,78 +121,33 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span><strong>24 hours</strong> of video content</span>
+                    <span><strong>{{ course.total_videos }}</strong> video content</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    <span><strong>8 hours</strong> of reading materials</span>
+                    <span><strong>{{ course.total_readings }}</strong> reading materials</span>
                 </div>
             </div>
         </div>
 
         <div class="space-y-2">
-            <!-- Module 1 -->
+            {% for module in course.modules.all %}
             <div class="border rounded-lg">
                 <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
                     <div>
-                        <h3 class="font-semibold text-lg">Module 1: Introduction to AI and ML</h3>
-                        <p class="text-sm text-gray-600 mt-1">5 lectures • 2.5 hours video • 1 hour reading</p>
+                        <h3 class="font-semibold text-lg">{{ module.name }}</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            {{ module.materials.count }} lectures 
+                            • {{ module.video_count }} video
+                            • {{ module.reading_count }} reading
+                        </p>
                     </div>
                 </div>
             </div>
-
-            <!-- Module 2 -->
-            <div class="border rounded-lg">
-                <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-semibold text-lg">Module 2: Python for Machine Learning</h3>
-                        <p class="text-sm text-gray-600 mt-1">8 lectures • 4 hours video • 2 hours reading</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 3 -->
-            <div class="border rounded-lg">
-                <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-semibold text-lg">Module 3: Supervised Learning Algorithms</h3>
-                        <p class="text-sm text-gray-600 mt-1">10 lectures • 5 hours video • 2 hours reading</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 4 -->
-            <div class="border rounded-lg">
-                <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-semibold text-lg">Module 4: Unsupervised Learning</h3>
-                        <p class="text-sm text-gray-600 mt-1">7 lectures • 3.5 hours video • 1.5 hours reading</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 5 -->
-            <div class="border rounded-lg">
-                <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-semibold text-lg">Module 5: Neural Networks and Deep Learning</h3>
-                        <p class="text-sm text-gray-600 mt-1">12 lectures • 6 hours video • 2 hours reading</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 6 -->
-            <div class="border rounded-lg">
-                <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-semibold text-lg">Module 6: Real-World Applications and Projects</h3>
-                        <p class="text-sm text-gray-600 mt-1">6 lectures • 3 hours video • 1 hour reading</p>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </section>
 

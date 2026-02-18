@@ -1,0 +1,78 @@
+{% extends "materials/sidebar.html" %}
+
+{% block material %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <!-- Reading Section -->
+    <section class="bg-white rounded-lg shadow-sm p-8">
+        <h1 class="text-3xl font-bold mb-2">{{ material.reading.first.title|default:material.name }}</h1>
+
+        {% if material.due_date %}
+        <div class="flex items-center text-gray-600 mb-6">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span class="text-sm">Due: {{ material.due_date|date:"F d, Y" }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Text Content -->
+        {% if material.reading.first.text %}
+        <div class="prose max-w-none mb-6">
+            <div class="text-gray-800 leading-relaxed whitespace-pre-wrap">{{ material.reading.first.text }}</div>
+        </div>
+        {% endif %}
+
+        <!-- File Attachment -->
+        {% if material.reading.first.file %}
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                        <p class="font-medium text-gray-900">Attached File</p>
+                        <p class="text-sm text-gray-500">{{ material.reading.first.file.name }}</p>
+                    </div>
+                </div>
+                <a href="{{ material.reading.first.file.url }}"
+                   download
+                   class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium">
+                    Download
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not material.reading.first.text and not material.reading.first.file %}
+        <div class="text-center py-12 text-gray-500">
+            <svg class="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <p>No content available</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Mark as Complete Section -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="flex justify-end">
+            <button
+                onclick="markComplete({{ material.id }})"
+                class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                Mark as Complete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function markComplete(materialId) {
+        // TODO: Implement completion tracking
+        alert('Completion tracking will be implemented soon!');
+    }
+</script>
+{% endblock %}

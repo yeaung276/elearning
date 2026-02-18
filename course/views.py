@@ -2,7 +2,7 @@ import json
 from datetime import date
 
 from django.views import View
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Count, Prefetch
 from django.utils.timezone import now
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -46,6 +46,33 @@ def explore(request):
 @renderer_classes([TemplateHTMLRenderer])
 def course_detail(request, id: int):
     course = get_object_or_404(Course.objects.annotate(avg_rating=Avg("ratings__rating"), rating_count=Count("ratings__rating")), id=id)
+    course = get_object_or_404(
+        Course.objects
+        .annotate(
+            avg_rating=Avg("ratings__rating"),
+            rating_count=Count("ratings__rating"),
+            total_videos=Count(
+                "modules__materials",
+                filter=Q(modules__materials__type="video")
+            ),
+            total_readings=Count(
+                "modules__materials",
+                filter=Q(modules__materials__type="reading")
+            ),
+        )
+        .prefetch_related(
+            Prefetch(
+                "modules",
+                queryset=Module.objects.annotate(
+                    total_materials=Count("materials"),
+                    video_count=Count("materials", filter=Q(materials__type="video")),
+                    reading_count=Count("materials", filter=Q(materials__type="reading")),
+                )
+            )
+        ),
+        id=id
+    )
+
 
     if request.user.is_authenticated:
         enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
@@ -85,11 +112,15 @@ class MaterialOverviewView(LoginRequiredMixin, View):
     
     def get(self, request, cid: int):
         course = get_object_or_404(Course, id=cid)
-        form = CourseForm(instance=course, show_status=True, disabled=request.user != course.user)
-        return render(request, "materials/overview.html", {
-            "form": form, 
-            "course": course
-        })
+        if request.user.is_authenticated:
+            enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
+            if is_enrolled(enrollment) or is_owner(course, request.user) or is_instructor(course, request.user):
+                form = CourseForm(instance=course, show_status=True, disabled=request.user != course.user)
+                return render(request, "materials/overview.html", {
+                    "form": form, 
+                    "course": course
+                })
+        return redirect("course", id=course.id) # type: ignore
     
     def post(self, request, cid: int):
         course = get_object_or_404(Course, id=cid)
@@ -262,6 +293,8 @@ class MaterialView(LoginRequiredMixin, View):
                 })
             return render(request, "materials/video/video.html", {
                 "course": course,
+                "material": material,
+                "open_module": material.module.id # type: ignore
             })
 
         if material.type == "reading":
@@ -275,6 +308,8 @@ class MaterialView(LoginRequiredMixin, View):
                 })
             return render(request, "materials/reading/reading.html", {
                 "course": course,
+                "material": material,
+                "open_module": material.module.id # type: ignore
             })
     
     def post(self, request, cid: int, mid: int):

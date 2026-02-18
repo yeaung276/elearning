@@ -8,6 +8,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from rest_framework.decorators import api_view, renderer_classes, permission_classes
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.permissions import IsAuthenticated
@@ -41,7 +42,60 @@ def is_instructor(course, user):
 
 @api_view(['GET'])
 def explore(request):
-    return render(request, "courses.html", {})
+    q = request.GET.get('q', '').strip()
+    categories = request.GET.getlist('categories')
+    sort_by = request.GET.get('sort_by', 'popular')
+
+    courses = Course.objects.filter(status='published')
+
+    # filter
+    if q:
+        courses = courses.filter(
+            Q(title__icontains=q) | Q(description__icontains=q)
+        )
+
+    if categories:
+        courses = courses.filter(category__in=categories)
+
+    courses = courses.annotate(
+        avg_rating=Avg('ratings__rating'),
+        enrollment_count=Count('enrollments', distinct=True),
+        rating_count=Count('ratings', distinct=True)
+    )
+
+    # Sort
+    if sort_by == 'rating':
+        courses = courses.order_by('-avg_rating', '-enrollment_count')
+    elif sort_by == 'newest':
+        courses = courses.order_by('-created_at')
+    else:
+        courses = courses.order_by('-enrollment_count', '-avg_rating')
+
+    # Paginate
+    page = Paginator(courses, 9).get_page(request.GET.get("page"))
+
+    total_count = Course.objects.filter(status='published').count()
+    category_counts = Course.objects.filter(status='published').values('category').annotate(count=Count('id'))
+    category_dict = {item['category']: item['count'] for item in category_counts}
+
+    # Prepare categories with counts for template
+    categories_with_counts = [
+        {
+            'key': key,
+            'label': label,
+            'count': category_dict.get(key, 0)
+        }
+        for key, label in Course.CATEGORY_CHOICES
+    ]
+
+    return render(request, "courses.html", {
+        'page': page,
+        'total_count': total_count,
+        'categories': categories_with_counts,
+        'q': q,
+        'selected_categories': categories,
+        'sort_by': sort_by,
+    })
     
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])

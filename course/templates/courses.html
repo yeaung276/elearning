@@ -7,414 +7,161 @@
 <div class="bg-white border-b">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 class="text-3xl font-bold mb-6">Explore Courses</h1>
-        <div class="relative">
-            <input type="text" placeholder="Search for courses..."
-                class="w-full px-6 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg">
-            <svg class="absolute right-6 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        </div>
+        <form method="GET" action="" id="filterForm">
+            <div class="relative">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search for courses..."
+                    class="w-full px-6 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg">
+                <svg class="absolute right-6 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input type="hidden" name="sort_by" id="hiddenSort" value="{{ sort_by }}">
+            <div id="hiddenCategories">
+                {% for cat in selected_categories %}
+                <input type="hidden" name="categories" value="{{ cat }}">
+                {% endfor %}
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- Main Content -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex gap-8">
-        <!-- Sidebar - Category Filters -->
+        <!-- Category Filters -->
         <aside class="w-64 flex-shrink-0">
             <div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
                 <h2 class="text-lg font-bold mb-4">Categories</h2>
                 <div class="space-y-2">
+                    {% for category in categories %}
                     <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">All Courses</span>
-                        <span class="ml-auto text-sm text-gray-500">234</span>
+                        <input type="checkbox" value="{{ category.key }}"
+                            {% if category.key in selected_categories %}checked{% endif %}
+                            class="category-checkbox w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            onchange="updateCategories()">
+                        <span class="text-gray-700">{{ category.label }}</span>
+                        <span class="ml-auto text-sm text-gray-500">{{ category.count }}</span>
                     </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Computer Science</span>
-                        <span class="ml-auto text-sm text-gray-500">87</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Data Science</span>
-                        <span class="ml-auto text-sm text-gray-500">45</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Business</span>
-                        <span class="ml-auto text-sm text-gray-500">62</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Design</span>
-                        <span class="ml-auto text-sm text-gray-500">34</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Marketing</span>
-                        <span class="ml-auto text-sm text-gray-500">28</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Mathematics</span>
-                        <span class="ml-auto text-sm text-gray-500">41</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Health & Fitness</span>
-                        <span class="ml-auto text-sm text-gray-500">19</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Language Learning</span>
-                        <span class="ml-auto text-sm text-gray-500">23</span>
-                    </label>
-                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Arts & Humanities</span>
-                        <span class="ml-auto text-sm text-gray-500">31</span>
-                    </label>
-                </div>
-
-                <div class="mt-6 pt-6 border-t">
-                    <h3 class="text-sm font-bold mb-3">Rating</h3>
-                    <div class="space-y-2">
-                        <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="ml-1 text-sm text-gray-700">4.5 & up</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="ml-1 text-sm text-gray-700">4.0 & up</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="ml-1 text-sm text-gray-700">3.5 & up</span>
-                            </div>
-                        </label>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </aside>
 
-        <!-- Course Grid -->
+        <!-- Courses -->
         <main class="flex-1">
             <div class="flex justify-between items-center mb-6">
-                <p class="text-gray-600">Showing <span class="font-semibold">234 courses</span></p>
-                <select
-                    class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Most Popular</option>
-                    <option>Highest Rated</option>
-                    <option>Newest</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
+                <p class="text-gray-600">Showing <span class="font-semibold">{{ page.paginator.count }} courses</span></p>
+                <select id="sortSelect"
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onchange="updateSort()">
+                    <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+                    <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
+                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
                 </select>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                <!-- Course Card 1 -->
-                <a href="/course/1"
+                {% for course in page %}
+                <a href="/course/{{ course.id }}"
                     class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
                     <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" alt="Course"
+                        {% if course.cover_img %}
+                        <img src="{{ course.cover_img.url }}" alt="{{ course.title }}"
                             class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Computer Science
+                        {% else %}
+                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <span class="text-gray-400 text-sm">No image</span>
+                        </div>
+                        {% endif %}
+                        <span class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            {{ course.get_category_display }}
                         </span>
                     </div>
                     <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Introduction to
-                            Machine Learning and Artificial Intelligence</h3>
-                        <p class="text-sm text-gray-600 mb-3">Dr. Sarah Johnson</p>
+                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">{{ course.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-3">{{ course.user.userprofile.name|default:course.user.username }}</p>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-1">
                                 <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                                     <path
                                         d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                                 </svg>
-                                <span class="text-sm font-semibold">4.8</span>
-                                <span class="text-sm text-gray-500">(2,847)</span>
+                                <span class="text-sm font-semibold">{{ course.avg_rating|floatformat:1|default:"N/A" }}</span>
+                                <span class="text-sm text-gray-500">({{ course.rating_count }})</span>
                             </div>
-                            <span class="text-sm text-gray-500">12,459 students</span>
+                            <span class="text-sm text-gray-500">{{ course.enrollment_count }} students</span>
                         </div>
                     </div>
                 </a>
-
-                <!-- Course Card 2 -->
-                <a href="/course/2"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Data Science
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Data Analysis with
-                            Python and Pandas</h3>
-                        <p class="text-sm text-gray-600 mb-3">Prof. James Chen</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.7</span>
-                                <span class="text-sm text-gray-500">(1,923)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">8,234 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 3 -->
-                <a href="/course/3"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Business
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Digital Marketing
-                            Strategy and Analytics</h3>
-                        <p class="text-sm text-gray-600 mb-3">Maria Rodriguez</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.9</span>
-                                <span class="text-sm text-gray-500">(3,456)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">15,678 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 4 -->
-                <a href="/course/4"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Design
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">UX/UI Design
-                            Fundamentals</h3>
-                        <p class="text-sm text-gray-600 mb-3">Alex Thompson</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.6</span>
-                                <span class="text-sm text-gray-500">(1,567)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">6,789 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 5 -->
-                <a href="/course/5"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Computer Science
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Full Stack Web
-                            Development Bootcamp</h3>
-                        <p class="text-sm text-gray-600 mb-3">David Kim</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.8</span>
-                                <span class="text-sm text-gray-500">(4,892)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">18,234 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 6 -->
-                <a href="/course/6"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-orange-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Mathematics
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Linear Algebra for
-                            Machine Learning</h3>
-                        <p class="text-sm text-gray-600 mb-3">Dr. Emily White</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.5</span>
-                                <span class="text-sm text-gray-500">(987)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">4,321 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 7 -->
-                <a href="/course/7"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Business
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Financial Analysis and
-                            Investment Strategies</h3>
-                        <p class="text-sm text-gray-600 mb-3">Robert Taylor</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.7</span>
-                                <span class="text-sm text-gray-500">(2,134)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">9,876 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 8 -->
-                <a href="/course/8"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-pink-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Language Learning
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Spanish for Beginners:
-                            Complete Course</h3>
-                        <p class="text-sm text-gray-600 mb-3">Sofia Martinez</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.9</span>
-                                <span class="text-sm text-gray-500">(5,678)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">22,345 students</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Course Card 9 -->
-                <a href="/course/9"
-                    class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition group">
-                    <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400" alt="Course"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-                        <span
-                            class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Computer Science
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600">Mobile App Development
-                            with React Native</h3>
-                        <p class="text-sm text-gray-600 mb-3">Chris Anderson</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-1">
-                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                                <span class="text-sm font-semibold">4.6</span>
-                                <span class="text-sm text-gray-500">(1,789)</span>
-                            </div>
-                            <span class="text-sm text-gray-500">7,654 students</span>
-                        </div>
-                    </div>
-                </a>
-
+                {% endfor %}
             </div>
 
             <!-- Pagination -->
             <div class="mt-12 flex justify-center">
                 <nav class="flex items-center space-x-2">
-                    <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                    {% if page.has_previous %}
+                    <a href="?q={{ q }}{% for cat in selected_categories %}&categories={{ cat }}{% endfor %}&sort_by={{ sort_by }}&page={{ page.previous_page_number }}"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
                         Previous
-                    </button>
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">1</button>
-                    <button
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
-                    <button
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
-                    <button
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">4</button>
-                    <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                    </a>
+                    {% else %}
+                    <span class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                        Previous
+                    </span>
+                    {% endif %}
+
+                    {% for num in page.paginator.page_range %}
+                    {% if page.number == num %}
+                    <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ num }}</span>
+                    {% else %}
+                    <a href="?q={{ q }}{% for cat in selected_categories %}&categories={{ cat }}{% endfor %}&sort_by={{ sort_by }}&page={{ num }}"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page.has_next %}
+                    <a href="?q={{ q }}{% for cat in selected_categories %}&categories={{ cat }}{% endfor %}&sort_by={{ sort_by }}&page={{ page.next_page_number }}"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
                         Next
-                    </button>
+                    </a>
+                    {% else %}
+                    <span class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                        Next
+                    </span>
+                    {% endif %}
                 </nav>
             </div>
         </main>
     </div>
 </div>
+
+<script>
+function updateCategories() {
+    const form = document.getElementById('filterForm');
+    const container = document.getElementById('hiddenCategories');
+    const checkboxes = document.querySelectorAll('.category-checkbox:checked');
+
+    container.innerHTML = '';
+    checkboxes.forEach(cb => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'categories';
+        input.value = cb.value;
+        container.appendChild(input);
+    });
+
+    form.submit();
+}
+
+function updateSort() {
+    const form = document.getElementById('filterForm');
+    const select = document.getElementById('sortSelect');
+    const hidden = document.getElementById('hiddenSort');
+
+    hidden.value = select.value;
+    form.submit();
+}
+</script>
 {% endblock %}

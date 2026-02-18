@@ -10,7 +10,8 @@ from .views import (
     enroll, 
     RatingOverviewView,
     ModuleView,
-    MaterialView
+    MaterialView,
+    marked_as_complete
 )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path('course/<int:id>/enroll/', enroll, name="enroll"),
     path('course/<int:cid>/material/', MaterialOverviewView.as_view(), name="material_overview"),
     path('course/<int:cid>/material/<int:mid>', MaterialView.as_view(), name="material"),
+    path('course/<int:cid>/material/<int:mid>/progress', marked_as_complete, name="marked_as_complete"),
     path('course/<int:cid>/module/', ModuleView.as_view(), name="module"),
     path('course/<int:cid>/instructor/', InstructorOverviewView.as_view(), name="instructor_overview"),
     path('course/<int:cid>/student/', StudentOverviewView.as_view(), name="student_overview"),

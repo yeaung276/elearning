@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load role_check %}
 {% load humanize %}
+{% load progress %}
 
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
@@ -121,15 +122,17 @@
                             </div>
                         </div>
                         {% if user|is_student %}
+                        {% with progress=c|progress_percentage:user %}
                         <div class="space-y-1">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Progress</span>
-                                <span class="font-semibold text-blue-600">65%</span>
+                                <span class="font-semibold text-blue-600">{{ progress }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 65%"></div>
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ progress }}%"></div>
                             </div>
                         </div>
+                        {% endwith %}
                         {% endif %}
                     </a>
                     {% endfor %}

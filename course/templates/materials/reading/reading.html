@@ -1,4 +1,5 @@
 {% extends "materials/sidebar.html" %}
+{% load progress %}
 
 {% block material %}
 <div class="max-w-5xl mx-auto space-y-6">
@@ -58,21 +59,19 @@
     </section>
 
     <!-- Mark as Complete Section -->
+    {% if not material|has_progress:user %}
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex justify-end">
-            <button
-                onclick="markComplete({{ material.id }})"
-                class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-                Mark as Complete
-            </button>
+            <form method="POST" action="{% url 'marked_as_complete' cid=course.id mid=material.id %}">
+                {% csrf_token %}
+                <button
+                    type="submit"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                    Mark as Complete
+                </button>
+            </form>
         </div>
     </div>
+    {% endif %}
 </div>
-
-<script>
-    function markComplete(materialId) {
-        // TODO: Implement completion tracking
-        alert('Completion tracking will be implemented soon!');
-    }
-</script>
 {% endblock %}

@@ -21,7 +21,8 @@ from .models import (
     Instructor, 
     Rating, 
     Module, 
-    Material
+    Material,
+    Progress
 )
 from people.mixin import TeacherRequiredMixin
 
@@ -286,7 +287,7 @@ class MaterialView(LoginRequiredMixin, View):
             form = VideoMaterialForm(instance=material.video.first(), initial={"due_date": material.due_date}) # type: ignore
             if is_owner:
                 return render(request, "materials/video/form.html", {
-                    "form": form, 
+                    "form": form,
                     "course": course,
                     "material": material,
                     "open_module": material.module.id, # type: ignore
@@ -294,7 +295,7 @@ class MaterialView(LoginRequiredMixin, View):
             return render(request, "materials/video/video.html", {
                 "course": course,
                 "material": material,
-                "open_module": material.module.id # type: ignore
+                "open_module": material.module.id, # type: ignore
             })
 
         if material.type == "reading":
@@ -309,7 +310,7 @@ class MaterialView(LoginRequiredMixin, View):
             return render(request, "materials/reading/reading.html", {
                 "course": course,
                 "material": material,
-                "open_module": material.module.id # type: ignore
+                "open_module": material.module.id, # type: ignore
             })
     
     def post(self, request, cid: int, mid: int):
@@ -398,3 +399,14 @@ def enroll(request, id: int):
         return Response({'message': 'Already enrolled'}, status=status.HTTP_200_OK)
     
     return Response({'message': 'Enrolled successfully'}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def marked_as_complete(request, cid: int, mid: int):
+    course = get_object_or_404(Course, id=cid)
+    material = get_object_or_404(Material, id=mid)
+    if material.module.course == course and Enrollment.objects.filter(user=request.user, course=course).exists(): # type: ignore
+        Progress.objects.get_or_create(user=request.user, material=material)
+        
+    return redirect("material", cid=cid, mid=mid)
+    

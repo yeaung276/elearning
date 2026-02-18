@@ -105,3 +105,11 @@ class ReadingMaterial(models.Model):
     file = models.FileField(upload_to='reading_materials/')
 
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+class Progress(models.Model):
+    material = models.ForeignKey(Material, on_delete=models.CASCADE, related_name="progress")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    created_at =  models.DateTimeField(auto_now_add=True)

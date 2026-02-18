@@ -267,3 +267,10 @@ This doesn't make sense. Deadlines shouldn't be publicily available and also hom
 - classmate can only view.
 # Rating
 - only student with active enrollment can create rating. they are aggregated
+# Course material
+- two material(video and reading), only owner can create the material and present the form, instructor and enrolled student can vide, other can't access this page, it need to add due date as an extra.
+- Have two model, material, materialVideo, materialReading, has one to one link with material.
+- Track progress using progress table, user click marked as complete, it create the progress, and calculate total progress based on how much it completed.
+- use progress template tags to calculate the progress to display in the course card in the student dashboard
+
+

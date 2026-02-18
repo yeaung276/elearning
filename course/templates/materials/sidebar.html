@@ -49,7 +49,7 @@
 
             <hr class="my-4">
 
-            <!-- Course Modules Section -->
+            <!-- Course Modules -->
             <h2 class="text-lg font-bold mb-4 text-gray-700">Modules</h2>
             {% for m in course.modules.all %}
             <div class="mb-4">
@@ -118,7 +118,7 @@
             </div>
             {% endfor %}
 
-            <!-- Add Module Button -->
+            <!-- Add Module -->
             {% if user.role == 'teacher' %}
             <button onclick="openModuleModal()"
                 class="flex items-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full font-medium">
@@ -131,7 +131,6 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
     <main class="flex-1 p-8 overflow-y-auto">
         {% block material %}
         {% endblock %}

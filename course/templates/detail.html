@@ -5,14 +5,13 @@
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
 {% block content %}
-<!-- Hero Section with Background Image -->
 <div class="relative bg-gray-900" style="height: 66vh;">
     <img src="{% if c.cover_img and c.cover_img.name %}{{ c.cover_img.url }}{% else %}https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200{% endif %}"
         alt="Course Cover" class="absolute inset-0 w-full h-full object-cover opacity-50">
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div class="flex h-full items-end pb-16">
-            <!-- Left Section: Course Meta -->
+            <!-- Course Meta -->
             <div class="w-1/3 text-white space-y-4">
                 <span class="inline-block bg-blue-600 px-4 py-1.5 rounded-full text-sm font-semibold">{{ course.category }}</span>
 
@@ -62,7 +61,7 @@
                 {% endif %}
             </div>
 
-            <!-- Right Section: Course Title -->
+            <!-- Course Title -->
             <div class="w-2/3 pl-16 text-white">
                 <h1 class="text-5xl font-bold mb-4 leading-tight">{{ course.title }}</h1>
                 <p class="text-xl text-gray-200">{{ course.subtitle }}</p>
@@ -71,10 +70,9 @@
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-    <!-- Instructor Section -->
+    <!-- Instructor -->
     <section class="bg-white rounded-lg shadow-sm p-8 mb-8">
         <h2 class="text-xl font-bold mb-6">Instructor</h2>
         {% for inst in instructors %}
@@ -94,7 +92,7 @@
             </div>
         </a>
         {% empty %}
-        <!-- Empty State (show when no instructors) -->
+        <!-- Empty Instructor -->
         <div id="empty-state" class="text-center py-12 text-gray-500">
             <p class="text-lg font-medium">No instructors</p>
         </div>
@@ -109,7 +107,7 @@
         </div>
     </section>
 
-    <!-- Curriculum Section -->
+    <!-- Curriculum -->
     <section class="bg-white rounded-lg shadow-sm p-8 mb-8">
         <div class="mb-6">
             <h2 class="text-2xl font-bold mb-4">Course Curriculum</h2>
@@ -151,7 +149,7 @@
         </div>
     </section>
 
-    <!-- Student Reviews -->
+    <!-- Reviews -->
     <section class="bg-white rounded-lg shadow-sm p-8">
         <h2 class="text-2xl font-bold mb-6">Student Reviews</h2>
 

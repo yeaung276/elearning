@@ -6,13 +6,11 @@
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
 {% block content %}
-
-<!-- Main Content -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-8">My Dashboard</h1>
 
     <div class="grid grid-cols-3 gap-6">
-        <!-- Left Column: Status Feed -->
+        <!-- Status -->
         <div class="col-span-2 space-y-6">
             <!-- Create Status -->
             <div class="bg-white rounded-lg shadow-sm p-6">
@@ -89,7 +87,7 @@
         </div>
 
         <div class="space-y-6">
-            <!-- Course Progress Section -->
+            <!-- Course Progress -->
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-gray-900">My Courses</h2>
@@ -101,7 +99,6 @@
                 </div>
                 <div class="space-y-4">
                     {% for c in courses %}
-                    <!-- Course 1 -->
                     <a href="{% url 'course' id=c.id %}" class="block hover:bg-gray-50 rounded-lg transition p-3 -m-3">
                         <div class="flex items-center space-x-4 mb-3">
                             <img src="{% if c.cover_img and c.cover_img.name %}{{ c.cover_img.url }}{% else %}https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100{% endif %}"
@@ -140,7 +137,6 @@
 
             <!-- Notifications and Deadlines Tabs -->
             <div class="bg-white rounded-lg shadow-sm">
-                <!-- Tab Headers -->
                 <div class="flex border-b">
                     <button class="flex-1 px-6 py-4 text-sm font-semibold text-blue-600 border-b-2 border-blue-600"
                         onclick="showTab('notifications')">
@@ -152,10 +148,9 @@
                     </button>
                 </div>
 
-                <!-- Notifications Tab Content -->
+                <!-- Notifications -->
                 <div id="notifications-tab" class="p-6">
                     <div class="space-y-4">
-                        <!-- Notification 1 -->
                         <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
                             <div
                                 class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -241,7 +236,7 @@
                     </div>
                 </div>
 
-                <!-- Deadlines Tab Content -->
+                <!-- Deadlines -->
                 <div id="deadlines-tab" class="p-6 hidden">
                     <div class="space-y-4">
                         {% for deadline in deadlines %}
@@ -272,21 +267,17 @@
 
 <script>
     function showTab(tabName) {
-        // Hide all tabs
         document.getElementById('notifications-tab').classList.add('hidden');
         document.getElementById('deadlines-tab').classList.add('hidden');
 
-        // Remove active styles from all buttons
         const buttons = document.querySelectorAll('button[onclick^="showTab"]');
         buttons.forEach(button => {
             button.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
             button.classList.add('text-gray-600');
         });
 
-        // Show selected tab
         document.getElementById(tabName + '-tab').classList.remove('hidden');
 
-        // Add active styles to clicked button
         event.target.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
         event.target.classList.remove('text-gray-600');
     }

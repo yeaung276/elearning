@@ -2,7 +2,7 @@
 
 {% block material %}
 <div class="space-y-8">
-    <!-- Page Header -->
+    <!-- Header -->
     <div class="bg-white rounded-lg shadow-sm p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">Rate This Course</h2>
         <p class="text-gray-600">Share your experience with others</p>
@@ -58,7 +58,6 @@
     const stars = document.querySelectorAll('.star');
     const ratingInput = document.getElementById('rating-input');
 
-    // pre-fill stars if editing existing rating
     const existing = parseInt(ratingInput.value);
     if (existing) highlight(existing);
 

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Course, Rating, Module
+from .models import Course, Rating, VideoMaterial, ReadingMaterial
 
 
 class CourseForm(forms.ModelForm):
@@ -108,4 +108,83 @@ class RatingForm(forms.ModelForm):
             raise forms.ValidationError("Please write a review.")
         if len(text) < 10:
             raise forms.ValidationError("Review must be at least 10 characters.")
+        return text
+
+class VideoMaterialForm(forms.ModelForm):
+    due_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            "type": "date",
+            "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition",
+        })
+    )
+
+    class Meta:
+        model = VideoMaterial
+        fields = ["title", "path"]
+
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition",
+                "placeholder": "Enter video title...",
+            }),
+            "path": forms.FileInput(attrs={
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition",
+                "accept": "video/*",
+            }),
+        }
+
+    def clean_title(self):
+        title = self.cleaned_data.get("title", "").strip()
+        if not title:
+            raise forms.ValidationError("Please enter a title.")
+        return title
+
+    def clean_path(self):
+        file = self.cleaned_data.get("path")
+        if not file:
+            raise forms.ValidationError("Please upload a video file.")
+        return file
+
+
+class ReadingMaterialForm(forms.ModelForm):
+    due_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            "type": "date",
+            "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition",
+        })
+    )
+
+    class Meta:
+        model = ReadingMaterial
+        fields = ["title", "text", "file"]
+
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition",
+                "placeholder": "Enter reading title...",
+            }),
+            "text": forms.Textarea(attrs={
+                "rows": 6,
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none",
+                "placeholder": "Write the reading content here...",
+            }),
+            "file": forms.FileInput(attrs={
+                "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition",
+            }),
+        }
+
+    def clean_title(self):
+        title = self.cleaned_data.get("title", "").strip()
+        if not title:
+            raise forms.ValidationError("Please enter a title.")
+        return title
+
+    def clean_text(self):
+        text = self.cleaned_data.get("text", "").strip()
+        if not text:
+            raise forms.ValidationError("Please enter the reading content.")
+        if len(text) < 10:
+            raise forms.ValidationError("Content must be at least 10 characters.")
         return text

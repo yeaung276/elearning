@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .forms import CourseForm, RatingForm
+from .forms import CourseForm, RatingForm, VideoMaterialForm, ReadingMaterialForm
 from .models import (
     Course, 
     Enrollment, 
@@ -239,12 +239,43 @@ class ModuleView(LoginRequiredMixin, TeacherRequiredMixin, View):
         module.delete()
         return JsonResponse({"ok": True})
     
-class MaterialView(LoginRequiredMixin, TeacherRequiredMixin, View):
+class MaterialView(LoginRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     
     def get(self, request, cid: int, mid: int):
-        ...
+        course = get_object_or_404(Course, id=cid)
+        material = get_object_or_404(Material, id=mid)
+        is_owner = request.user == course.user
+        
+        if material.module.course != course:
+            raise Http404()
+
+        if material.type == "video":
+            form = VideoMaterialForm(instance=material.video.first(), initial={"due_date": material.due_date}) # type: ignore
+            if is_owner:
+                return render(request, "materials/video/form.html", {
+                    "form": form, 
+                    "course": course,
+                    "material": material,
+                    "open_module": material.module.id, # type: ignore
+                })
+            return render(request, "materials/video/video.html", {
+                "course": course,
+            })
+
+        if material.type == "reading":
+            form = ReadingMaterialForm(instance=material.reading.first(), initial={"due_date": material.due_date}) # type: ignore
+            if is_owner:
+                return render(request, "materials/reading/form.html", {
+                    "form": form,
+                    "course": course,
+                    "material": material,
+                    "open_module": material.module.id, # type: ignore
+                })
+            return render(request, "materials/reading/reading.html", {
+                "course": course,
+            })
     
     def post(self, request, cid: int, mid: int):
         course = get_object_or_404(Course, id=cid)
@@ -252,15 +283,48 @@ class MaterialView(LoginRequiredMixin, TeacherRequiredMixin, View):
             return redirect("material_overview", cid=course.id) # type: ignore
         
         module = get_object_or_404(Module, id=request.POST.get("module_id"), course=course)
-        name = request.POST.get("name", "").strip()
-        type_ = request.POST.get("type", "").strip()
-
-        if name and type_ in Material.Type.values:
-            material = Material.objects.create(module=module, name=name, type=type_)
+        if request.POST.get('sidebar'):
+            material = Material.objects.create(
+                module=module, 
+                name=request.POST.get("name", "").strip(), 
+                type=request.POST.get("type", "").strip()
+            )
             return redirect("material", cid=course.id, mid=material.id) # type: ignore
-
-        return redirect("material_overview", cid=course.id) # type: ignore
         
+        material = get_object_or_404(Material, id=mid)
+        if material.module != module:
+            return redirect("material", cid=course.id, mid=material.id) # type: ignore
+        
+        if material.type == "video":
+            form = VideoMaterialForm(request.POST, request.FILES)
+            if form.is_valid():
+                video = form.save(commit=False)
+                video.material = material
+                video.save()
+                material.due_date = form.cleaned_data["due_date"]
+                material.save()
+                return redirect("material", cid=course.id, mid=material.id) # type: ignore
+            return render(request, "materials/video/form.html", {
+                "form": form,
+                "course": course,
+                "open_module": material.module.id # type: ignore
+            })
+        if material.type == "reading":
+            form = ReadingMaterialForm(request.POST, request.FILES)
+            if form.is_valid():
+                reading = form.save(commit=False)
+                reading.material = material
+                reading.save()
+                material.due_date = form.cleaned_data["due_date"]
+                material.save()
+                return redirect("material", cid=course.id, mid=material.id) # type: ignore
+            return render(request, "materials/reading/form.html", {
+                "form": form,
+                "course": course,
+                "open_module": material.module.id # type: ignore
+            })
+        return redirect("material", cid=course.id, mid=material.id) # type: ignore
+
     def delete(self, request, cid: int, mid: int):
         course = get_object_or_404(Course, id=cid)
         if request.user != course.user:

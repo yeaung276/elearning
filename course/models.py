@@ -91,4 +91,17 @@ class Material(models.Model):
     due_date = models.DateField(null=True, blank=True)
     type = models.CharField(max_length=10, choices=Type.choices, blank=False)
     
-    
+class VideoMaterial(models.Model):
+    material = models.ForeignKey(Material, on_delete=models.CASCADE, related_name="video")
+    path = models.FileField(upload_to='videos/')
+    title = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class ReadingMaterial(models.Model):
+    material = models.ForeignKey(Material, on_delete=models.CASCADE, related_name="reading")
+    title = models.CharField(max_length=255, blank=True)
+    text = models.TextField(blank=True)
+    file = models.FileField(upload_to='reading_materials/')
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)

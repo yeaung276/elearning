@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.decorators import api_view
@@ -10,11 +12,12 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Avg
+from django.utils import timezone
 from django.views import View
 
 from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
 from .models import UserProfile, Status
-from course.models import Course
+from course.models import Course, Material
 
 
 User = get_user_model()
@@ -36,9 +39,20 @@ def dashboard(request):
         Q(enrollments__user=request.user) |             # Enrolled course
         Q(instructors__user=request.user)               # Instructor cause
     ).annotate(avg_rating=Avg("ratings__rating")).distinct()
-
     
-    return render(request, "dashboard.html", {"page": page, "courses": courses })
+    deadlines = Material.objects.filter(
+        module__course__enrollments__user=request.user,
+        module__course__enrollments__expired_at__gte=timezone.now(),
+        due_date__lte=timezone.now() + timedelta(days=10)
+    ).exclude(
+        progress__user=request.user
+    ).distinct()
+    
+    return render(request, "dashboard.html", {
+        "page": page, 
+        "courses": courses,
+        "deadlines": deadlines
+    })
 
 # ============= Authentication ===============
 class RegisterView(View):

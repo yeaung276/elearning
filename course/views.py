@@ -119,7 +119,7 @@ class MaterialOverviewView(LoginRequiredMixin, View):
                 form = CourseForm(instance=course, show_status=True, disabled=request.user != course.user)
                 return render(request, "materials/overview.html", {
                     "form": form, 
-                    "course": course
+                    "course": course,
                 })
         return redirect("course", id=course.id) # type: ignore
     
@@ -343,6 +343,7 @@ class MaterialView(LoginRequiredMixin, View):
             return render(request, "materials/video/form.html", {
                 "form": form,
                 "course": course,
+                "material": material,
                 "open_module": material.module.id # type: ignore
             })
         if material.type == "reading":
@@ -357,6 +358,7 @@ class MaterialView(LoginRequiredMixin, View):
             return render(request, "materials/reading/form.html", {
                 "form": form,
                 "course": course,
+                "material": material,
                 "open_module": material.module.id # type: ignore
             })
         return redirect("material", cid=course.id, mid=material.id) # type: ignore

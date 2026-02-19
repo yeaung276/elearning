@@ -276,3 +276,9 @@ This doesn't make sense. Deadlines shouldn't be publicily available and also hom
 # deadlines
 - geather all material from the enrolled courses, has 3 level, overdue(red), withing week(yellow), within 10 days(green)
 - click the deadline and go to the material
+# Notifications
+Use signal to trigger notification. each view fn trigger a signal, notificaiton handle that signal, create notification obj, and send to the ws if there is connected client.
+- if course material is created, send notification to all enrolled student of the course
+- if status is created by a instructor, send notification to all enrolled student of the courses he instruct
+- if status is created by a student, send notification to all enrolled student of the courses he enrolled.
+- if student is enrolled, send notification to all instructor and owner of the course

@@ -17,7 +17,7 @@
 
                 <div class="text-sm">
                     <span class="text-gray-300">Created by</span>
-                    <a href="/instructor/123" class="ml-1 underline hover:text-blue-300 font-medium">{{ course.user.userprofile.name }}</a>
+                    <a href="{% url 'profile' id=course.user.id %}" class="ml-1 underline hover:text-blue-300 font-medium">{{ course.user.userprofile.name }}</a>
                 </div>
 
                 <div class="space-y-1">

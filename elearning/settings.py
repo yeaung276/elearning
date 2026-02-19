@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "people",
     "message",
     "notification",
+    "channels",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -72,7 +73,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'elearning.wsgi.application'
+ASGI_APPLICATION = 'elearning.asgi.application'
 
+# Channels
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

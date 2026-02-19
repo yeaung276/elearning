@@ -1,5 +1,7 @@
 {% extends "materials/sidebar.html" %}
 
+{% load role_check %}
+
 {% block material %}
 <div class="space-y-8">
     <!-- Header -->
@@ -62,7 +64,7 @@
                         <p class="text-sm text-gray-500 mt-1">View Profile →</p>
                     </div>
                 </a>
-                {% if user.role == 'teacher' %}
+                {% if user|is_teacher %}
                 <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
                     <button type="button"
                         class="px-4 py-2 rounded-lg font-semibold transition {% if enrollment.blocked %}bg-yellow-50 text-yellow-600 hover:bg-yellow-100{% else %}bg-orange-50 text-orange-600 hover:bg-orange-100{% endif %}"

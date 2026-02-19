@@ -18,6 +18,8 @@ from django.views import View
 from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
 from .models import UserProfile, Status
 from course.models import Course, Material
+from notification.signals import status_created
+from notification.models import Notifications
 
 
 User = get_user_model()
@@ -48,10 +50,13 @@ def dashboard(request):
         progress__user=request.user
     ).distinct()
     
+    notifications = Notifications.objects.filter(user=request.user).order_by("-created_at").all()
+    
     return render(request, "dashboard.html", {
         "page": page, 
         "courses": courses,
-        "deadlines": deadlines
+        "deadlines": deadlines,
+        "notifications": notifications,
     })
 
 # ============= Authentication ===============
@@ -80,14 +85,13 @@ def profile(request, id: int):
     if not profile:
         raise Http404
 
-    status = Status.objects.filter(user=request.user).order_by("-created_at")
-
     courses = Course.objects.filter(
-        Q(user=request.user) |                          # Own course 
-        Q(enrollments__user=request.user) |             # Enrolled course
-        Q(instructors__user=request.user)               # Instructor cause
+        Q(user=user) |                          # Own course 
+        Q(enrollments__user=user) |             # Enrolled course
+        Q(instructors__user=user)               # Instructor cause
     ).annotate(avg_rating=Avg("ratings__rating")).distinct()
     
+    status = Status.objects.filter(user=user).order_by("-created_at")
     paginator = Paginator(status, 5)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -168,6 +172,7 @@ class StatusView(View, LoginRequiredMixin):
             status = form.save(commit=False)
             status.user = request.user
             status.save()
+            status_created.send(sender=None, status_id=status.id) # type: ignore
             return redirect("dashboard")
         
         return render(request, "status/new.html", {"form": form})

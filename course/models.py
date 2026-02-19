@@ -102,7 +102,7 @@ class ReadingMaterial(models.Model):
     material = models.ForeignKey(Material, on_delete=models.CASCADE, related_name="reading")
     title = models.CharField(max_length=255, blank=True)
     text = models.TextField(blank=True)
-    file = models.FileField(upload_to='reading_materials/')
+    file = models.FileField(upload_to='reading_materials/', blank=True, null=True)
 
     uploaded_at = models.DateTimeField(auto_now_add=True)
     

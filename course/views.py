@@ -26,6 +26,7 @@ from .models import (
     Progress
 )
 from people.mixin import TeacherRequiredMixin
+from notification.signals import material_created, enrollment_created
 
 
 User = get_user_model()
@@ -393,6 +394,7 @@ class MaterialView(LoginRequiredMixin, View):
                 video.save()
                 material.due_date = form.cleaned_data["due_date"]
                 material.save()
+                material_created.send(sender=None, mid=material.id) # type: ignore
                 return redirect("material", cid=course.id, mid=material.id) # type: ignore
             return render(request, "materials/video/form.html", {
                 "form": form,
@@ -400,6 +402,7 @@ class MaterialView(LoginRequiredMixin, View):
                 "material": material,
                 "open_module": material.module.id # type: ignore
             })
+        
         if material.type == "reading":
             form = ReadingMaterialForm(request.POST, request.FILES)
             if form.is_valid():
@@ -408,6 +411,7 @@ class MaterialView(LoginRequiredMixin, View):
                 reading.save()
                 material.due_date = form.cleaned_data["due_date"]
                 material.save()
+                material_created.send(sender=None, mid=material.id) # type: ignore
                 return redirect("material", cid=course.id, mid=material.id) # type: ignore
             return render(request, "materials/reading/form.html", {
                 "form": form,
@@ -415,6 +419,7 @@ class MaterialView(LoginRequiredMixin, View):
                 "material": material,
                 "open_module": material.module.id # type: ignore
             })
+        
         return redirect("material", cid=course.id, mid=material.id) # type: ignore
 
     def delete(self, request, cid: int, mid: int):
@@ -440,21 +445,19 @@ def enroll(request, id: int):
         }
     )
     
-    if not created:
-        if enrollment.status == 'blocked':
-            return Response(
-                {'error': 'You are blocked from this course'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+    if not created and enrollment.status == 'blocked':
+        return Response(
+            {'error': 'You are blocked from this course'},
+            status=status.HTTP_403_FORBIDDEN
+        )
         
-        if enrollment.expired_at < now().date():
-            enrollment.expired_at = course.course_end
-            enrollment.save()
-            return Response({'message': 'Enrollment renewed'}, status=status.HTTP_200_OK)
+    if not created and enrollment.expired_at < now().date():
+        enrollment.expired_at = course.course_end
+        enrollment.save()
         
-        return Response({'message': 'Already enrolled'}, status=status.HTTP_200_OK)
-    
-    return Response({'message': 'Enrolled successfully'}, status=status.HTTP_201_CREATED)
+    enrollment_created.send(sender=None, enrollment_id=enrollment.id) # type: ignore
+    return Response({'message': 'Enroll successfully'}, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

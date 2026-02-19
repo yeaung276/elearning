@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load progress %}
+{% load role_check %}
 
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
@@ -36,7 +37,7 @@
                     <span class="font-semibold">Students</span>
                 </a>
 
-                {% if user.role == 'student' %}
+                {% if user|is_student %}
                 <a href="{% url 'rating_overview' cid=course.id %}" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded-lg">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -56,7 +57,7 @@
                 <div class="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-200">
                     <span class="font-semibold" onclick="toggleModule('module{{m.id}}')">{{ m.name }}</span>
                     <div class="flex items-center space-x-2">
-                        {% if user.role == 'teacher' %}
+                        {% if user|is_teacher %}
                         <button onclick="deleteModule({{ m.id }}, {{ course.id }})" class="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -95,7 +96,7 @@
                             </svg>
                             {% endif %}
                         </a>
-                        {% if user.role == 'teacher' %}
+                        {% if user|is_teacher %}
                         <button onclick="deleteMaterial({{ material.id }}, {{ course.id }})" class="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -105,7 +106,7 @@
                         {% endif %}
                     </div>
                     {% endfor %}
-                    {% if user.role == 'teacher' %}
+                    {% if user|is_teacher %}
                     <button onclick="openMaterialModal('{{ m.id }}')"
                         class="flex items-center space-x-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded w-full text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +120,7 @@
             {% endfor %}
 
             <!-- Add Module -->
-            {% if user.role == 'teacher' %}
+            {% if user|is_teacher %}
             <button onclick="openModuleModal()"
                 class="flex items-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

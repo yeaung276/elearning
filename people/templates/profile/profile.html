@@ -29,7 +29,8 @@
                     <div class="flex-1">
                         <div class="flex items-start justify-between mb-2">
                             <h1 class="text-3xl font-bold text-gray-900">{{ profile.name }}</h1>
-                            <a href="/messages?id=123"
+                            {% if profile.user != user %}
+                            <a href="{% url 'message' id=profile.id %}"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition flex items-center space-x-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -37,7 +38,9 @@
                                 </svg>
                                 <span>Message</span>
                             </a>
+                            {% endif %}
                         </div>
+
                         <p class="text-xl text-gray-600 mb-4">{{ profile.title }}</p>
 
                         <div class="space-y-2 text-gray-700 mb-6">

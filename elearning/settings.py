@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "people",
     "message",
     "notification",
-    "channels",
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

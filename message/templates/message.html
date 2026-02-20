@@ -1,219 +1,120 @@
-{% extends "base.html" %}
+{% extends "shared/base.html" %}
 
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
-{% block content %}
-<!-- Main Chat Container -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden" style="height: calc(100vh - 160px);">
-        <div class="flex h-full">
-
-            <!-- Left Sidebar - Conversations List -->
-            <div class="w-1/3 border-r border-gray-200 flex flex-col">
-                <!-- Search Bar -->
-                <div class="p-4 border-b border-gray-200">
-                    <div class="relative">
-                        <input type="text" placeholder="Search messages..."
-                            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Conversations List -->
-                <div class="flex-1 overflow-y-auto">
-                    <!-- Active Conversation -->
-                    <a href="/messages?id=123"
-                        class="flex items-start space-x-3 p-4 hover:bg-gray-50 border-l-4 border-blue-600 bg-blue-50">
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                            SJ
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900 truncate">Dr. Sarah Johnson</h3>
-                                <span class="text-xs text-gray-500">2m</span>
-                            </div>
-                            <p class="text-sm text-gray-600 truncate">Thank you for your interest in the course!</p>
-                        </div>
-                    </a>
-
-                    <!-- Other Conversations -->
-                    <a href="/messages?id=124" class="flex items-start space-x-3 p-4 hover:bg-gray-50">
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                            MK
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900 truncate">Michael Kim</h3>
-                                <span class="text-xs text-gray-500">1h</span>
-                            </div>
-                            <p class="text-sm text-gray-600 truncate">Can you recommend some resources for...</p>
-                        </div>
-                    </a>
-
-                    <a href="/messages?id=125" class="flex items-start space-x-3 p-4 hover:bg-gray-50">
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                            EP
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900 truncate">Elena Petrova</h3>
-                                <span class="text-xs text-gray-500">3h</span>
-                            </div>
-                            <p class="text-sm text-gray-600 truncate">Great lecture yesterday!</p>
-                        </div>
-                    </a>
-
-                    <a href="/messages?id=126" class="flex items-start space-x-3 p-4 hover:bg-gray-50">
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                            RC
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900 truncate">Raj Chakraborty</h3>
-                                <span class="text-xs text-gray-500">1d</span>
-                            </div>
-                            <p class="text-sm text-gray-600 truncate">I have a question about the assignment</p>
-                        </div>
-                    </a>
-
-                    <a href="/messages?id=127" class="flex items-start space-x-3 p-4 hover:bg-gray-50">
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                            AM
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900 truncate">Anna Martinez</h3>
-                                <span class="text-xs text-gray-500">2d</span>
-                            </div>
-                            <p class="text-sm text-gray-600 truncate">Thanks for the feedback on my project</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right Side - Chat Area -->
-            <div class="flex-1 flex flex-col">
-                <!-- Chat Header -->
-                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div
-                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                            SJ
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                            <p class="text-sm text-gray-500">Active now</p>
-                        </div>
-                    </div>
-                    <a href="/profile/123" class="text-blue-600 hover:text-blue-700 font-medium text-sm">View
-                        Profile</a>
-                </div>
-
-                <!-- Messages Area -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-4">
-                    <!-- Received Message -->
-                    <div class="flex items-start space-x-3">
-                        <div
-                            class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                            SJ
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-gray-100 rounded-lg p-3 max-w-md">
-                                <p class="text-gray-800">Hi! Thank you for reaching out about the Machine Learning
-                                    course. I'd be happy to answer any questions you have.</p>
-                            </div>
-                            <span class="text-xs text-gray-500 mt-1 block">10:30 AM</span>
-                        </div>
-                    </div>
-
-                    <!-- Sent Message -->
-                    <div class="flex items-start space-x-3 justify-end">
-                        <div class="flex-1 flex flex-col items-end">
-                            <div class="bg-blue-600 rounded-lg p-3 max-w-md">
-                                <p class="text-white">Hello Dr. Johnson! I'm very interested in enrolling in your
-                                    course. Could you tell me more about the prerequisites?</p>
-                            </div>
-                            <span class="text-xs text-gray-500 mt-1 block">10:32 AM</span>
-                        </div>
-                    </div>
-
-                    <!-- Received Message -->
-                    <div class="flex items-start space-x-3">
-                        <div
-                            class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                            SJ
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-gray-100 rounded-lg p-3 max-w-md">
-                                <p class="text-gray-800">Great question! For this course, you'll need basic Python
-                                    programming knowledge and a fundamental understanding of mathematics (linear algebra
-                                    and calculus). Don't worry if you're not an expert - we'll review the essentials in
-                                    the first week.</p>
-                            </div>
-                            <span class="text-xs text-gray-500 mt-1 block">10:33 AM</span>
-                        </div>
-                    </div>
-
-                    <!-- Sent Message -->
-                    <div class="flex items-start space-x-3 justify-end">
-                        <div class="flex-1 flex flex-col items-end">
-                            <div class="bg-blue-600 rounded-lg p-3 max-w-md">
-                                <p class="text-white">Perfect! I have some Python experience and I'm currently brushing
-                                    up on my math. When does the next session start?</p>
-                            </div>
-                            <span class="text-xs text-gray-500 mt-1 block">10:35 AM</span>
-                        </div>
-                    </div>
-
-                    <!-- Received Message -->
-                    <div class="flex items-start space-x-3">
-                        <div
-                            class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                            SJ
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-gray-100 rounded-lg p-3 max-w-md">
-                                <p class="text-gray-800">Thank you for your interest in the course! Registration opens
-                                    on January 15th and the course starts on April 5th, 2026. You can enroll through the
-                                    course page. Looking forward to having you in class!</p>
-                            </div>
-                            <span class="text-xs text-gray-500 mt-1 block">Just now</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Message Input Area -->
-                <div class="p-4 border-t border-gray-200">
-                    <div class="flex items-end space-x-3">
-                        <button class="p-2 text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                            </svg>
-                        </button>
-                        <textarea rows="1" placeholder="Type a message..."
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
+{% block chat_content %}
+<!-- Chat Header -->
+<div class="p-4 border-b border-gray-200 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+        {% if target.userprofile.picture %}
+        <img src="{{ target.userprofile.picture.url }}" alt="Profile picture"
+            class="w-20 h-20 rounded-full object-cover">
+        {% else %}
+        <div
+            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+            {{ target.username|first|upper }}
         </div>
+        {% endif %}
+        <div>
+            <h3 class="font-semibold text-gray-900">{{ target.userprofile.name }}</h3>
+            <p class="text-sm text-gray-500"></p>
+        </div>
+    </div>
+    <a href="{% url 'profile' id=target.id %}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">View
+        Profile</a>
+</div>
+
+<!-- Messages Area -->
+<div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+    {% for m in messages %}
+    {% if m.sender == request.user %}
+    <!-- Sent Message -->
+    <div class="flex items-start space-x-3 justify-end">
+        <div class="flex-1 flex flex-col items-end">
+            <div class="bg-blue-600 rounded-lg p-3 max-w-md">
+                <p class="text-white">{{ m.content }}</p>
+            </div>
+            <span class="text-xs text-gray-500 mt-1 block">{{ m.sent_at|date:"N j, g:i A" }}</span>
+        </div>
+    </div>
+    {% else %}
+    <!-- Received Message -->
+    <div class="flex items-start space-x-3">
+        <div class="flex-1">
+            <div class="bg-gray-100 rounded-lg p-3 max-w-md">
+                <p class="text-gray-800">{{ m.content }}</p>
+            </div>
+            <span class="text-xs text-gray-500 mt-1 block">{{ m.sent_at|date:"N j, g:i A" }}</span>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Message Input Area -->
+<div class="p-4 border-t border-gray-200">
+    <div class="flex items-end space-x-3">
+        <textarea id="message-input" rows="1" placeholder="Type a message..."
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        <button id="message-submit" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        </button>
     </div>
 </div>
 
+<script>
+    const currentUserId = {{ user.id }};
+    const ws = new WebSocket(`ws://${window.location.host}/ws/messages/{{ conversation.id }}/`);
+
+    const textarea = document.getElementById('message-input');
+    const sendBtn = document.getElementById('message-submit');
+    const msgContainer = document.getElementById('messages');
+
+    ws.onopen = () => console.log('Connected');
+
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        const isSent = data.sender_id == currentUserId;
+
+        const div = document.createElement('div');
+        div.className = `flex items-start space-x-3 ${isSent ? 'justify-end' : ''}`;
+        div.innerHTML = isSent
+            ? `<div class="flex-1 flex flex-col items-end">
+                <div class="bg-blue-600 rounded-lg p-3 max-w-md">
+                    <p class="text-white">${data.message}</p>
+                </div>
+                <span class="text-xs text-gray-500 mt-1 block">${data.sent_at}</span>
+            </div>`
+            : `<div class="flex-1">
+                <div class="bg-gray-100 rounded-lg p-3 max-w-md">
+                    <p class="text-gray-800">${data.message}</p>
+                </div>
+                <span class="text-xs text-gray-500 mt-1 block">${data.sent_at}</span>
+            </div>`;
+
+        msgContainer.appendChild(div);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    };
+
+
+    ws.onclose = () => console.log('Disconnected');
+    ws.onerror = (e) => console.error('WS error', e);
+
+    sendBtn.addEventListener('click', () => {
+        const msg = textarea.value.trim();
+        if (!msg) return;
+        ws.send(JSON.stringify({ message: msg }));
+        textarea.value = '';
+    });
+
+    textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+</script>
 {% endblock %}

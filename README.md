@@ -282,3 +282,5 @@ Use signal to trigger notification. each view fn trigger a signal, notificaiton 
 - if status is created by a instructor, send notification to all enrolled student of the courses he instruct
 - if status is created by a student, send notification to all enrolled student of the courses he enrolled.
 - if student is enrolled, send notification to all instructor and owner of the course
+# Chat
+- chat, perticipants, message these are db structure. once you visit the link, it either create a new conversation or get the existing one if there is already one.

@@ -42,6 +42,7 @@ def is_instructor(course, user):
 
 
 @api_view(['GET'])
+@renderer_classes([TemplateHTMLRenderer])
 def explore(request):
     q = request.GET.get('q', '').strip()
     categories = request.GET.getlist('categories')

@@ -1,6 +1,6 @@
 {% extends "shared/base.html" %}
 
-{% block title %}{{ course.title }} - ELearning{% endblock %}
+{% block title %}ELearning{% endblock %}
 
 {% block chat_content %}
 <!-- Chat Header -->
@@ -10,8 +10,7 @@
         <img src="{{ target.userprofile.picture.url }}" alt="Profile picture"
             class="w-20 h-20 rounded-full object-cover">
         {% else %}
-        <div
-            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
             {{ target.username|first|upper }}
         </div>
         {% endif %}
@@ -20,14 +19,29 @@
             <p class="text-sm text-gray-500"></p>
         </div>
     </div>
-    <a href="{% url 'profile' id=target.id %}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">View
-        Profile</a>
+    <div class="flex items-center space-x-3">
+        <a href="{% url 'call' id=conversation.id %}"
+            class="w-9 h-9 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
+            </svg>
+        </a>
+        <a href="{% url 'profile' id=target.id %}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">View Profile</a>
+    </div>
 </div>
 
 <!-- Messages Area -->
 <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+<div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4">
     {% for m in messages %}
-    {% if m.sender == request.user %}
+    {% if not m.sender %}
+    <!-- System Message -->
+    <div class="flex justify-center">
+        <div class="bg-gray-200 rounded-full px-4 py-1">
+            <p class="text-gray-500 text-xs text-center">{{ m.content }}</p>
+        </div>
+    </div>
+    {% elif m.sender == request.user %}
     <!-- Sent Message -->
     <div class="flex items-start space-x-3 justify-end">
         <div class="flex-1 flex flex-col items-end">
@@ -49,6 +63,7 @@
     </div>
     {% endif %}
     {% endfor %}
+</div>
 </div>
 
 <!-- Message Input Area -->
@@ -77,23 +92,32 @@
 
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        const isSent = data.sender_id == currentUserId;
-
         const div = document.createElement('div');
-        div.className = `flex items-start space-x-3 ${isSent ? 'justify-end' : ''}`;
-        div.innerHTML = isSent
-            ? `<div class="flex-1 flex flex-col items-end">
-                <div class="bg-blue-600 rounded-lg p-3 max-w-md">
-                    <p class="text-white">${data.message}</p>
-                </div>
-                <span class="text-xs text-gray-500 mt-1 block">${data.sent_at}</span>
-            </div>`
-            : `<div class="flex-1">
-                <div class="bg-gray-100 rounded-lg p-3 max-w-md">
-                    <p class="text-gray-800">${data.message}</p>
-                </div>
-                <span class="text-xs text-gray-500 mt-1 block">${data.sent_at}</span>
-            </div>`;
+
+        if (!data.sender_id) {
+            // System Message
+            div.className = 'flex justify-center';
+            div.innerHTML = `
+                <div class="bg-gray-200 rounded-full px-4 py-1">
+                    <p class="text-gray-500 text-xs text-center">${data.message}</p>
+                </div>`;
+        } else {
+            const isSent = data.sender_id == currentUserId;
+            div.className = `flex items-start space-x-3 ${isSent ? 'justify-end' : ''}`;
+            div.innerHTML = isSent
+                ? `<div class="flex-1 flex flex-col items-end">
+                    <div class="bg-blue-600 rounded-lg p-3 max-w-md">
+                        <p class="text-white">${data.message}</p>
+                    </div>
+                    <span class="text-xs text-gray-500 mt-1 block">${data.sent_at}</span>
+                </div>`
+                : `<div class="flex-1">
+                    <div class="bg-gray-100 rounded-lg p-3 max-w-md">
+                        <p class="text-gray-800">${data.message}</p>
+                    </div>
+                    <span class="text-xs text-gray-500 mt-1 block">${data.sent_at}</span>
+                </div>`;
+        }
 
         msgContainer.appendChild(div);
         msgContainer.scrollTop = msgContainer.scrollHeight;

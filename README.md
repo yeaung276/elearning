@@ -284,3 +284,8 @@ Use signal to trigger notification. each view fn trigger a signal, notificaiton 
 - if student is enrolled, send notification to all instructor and owner of the course
 # Chat
 - chat, perticipants, message these are db structure. once you visit the link, it either create a new conversation or get the existing one if there is already one.
+# audio call with exchange process
+- user lend on ght call page, it send ping, if other side is already there, it send pong, and change the state from calling to connecting
+it initiate ws, rtc, media tracks and send the offer, whoever complete the ice gathering first.
+- the other side receive the offer, set remote descritpin, send answer, other side set remote description and connection is estiblished.
+- has p5js canvas, which send key press and mouse events to the remote and draw the stroke on the canvas, and also send clear board event to clear the canvas.

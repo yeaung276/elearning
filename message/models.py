@@ -32,7 +32,8 @@ class Message(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="sender"
+        related_name="sender",
+        null=True,
     )
     content = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)

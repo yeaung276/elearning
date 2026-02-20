@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, renderer_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -55,4 +55,18 @@ def message(request, id: int):
         "messages": conv.messages.order_by("sent_at").all(), # type: ignore
         "target": target,
     })
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+@renderer_classes([TemplateHTMLRenderer])
+def call(request, id: int):
+    conv = get_object_or_404(Conversation, id=id)
+    
+    target = conv.participants.exclude(user=request.user).first().user # type: ignore
+    
+    return render(request, "call.html", {
+        "conversation": conv,
+        "target": target,
+    })
+
 

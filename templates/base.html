@@ -9,6 +9,10 @@
 </head>
 
 <body class="bg-gray-50">
+
+    <!-- Notification -->
+    <div id="notification-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 w-80"></div>
+
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,6 +60,39 @@
 
     {% block content %}
     {% endblock %}
+
+    {% if user.is_authenticated %}
+    <script>
+        const container = document.getElementById("notification-container");
+
+        function showNotification(data) {
+            const el = document.createElement("div");
+            el.className = "bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-start gap-3 animate-pulse-once";
+            el.innerHTML = `
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-800">${data.title ?? "Notification"}</p>
+                    <p class="text-sm text-gray-600 mt-0.5">${data.message ?? ""}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+            `;
+            container.appendChild(el);
+        }
+
+        const ws = new WebSocket(`ws://${location.host}/ws/notification/`);
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                showNotification(data);
+            } catch {
+                showNotification({ title: "Notification", message: event.data });
+            }
+        };
+
+        ws.onclose = () => console.warn("Notification WS closed");
+        ws.onerror = (e) => console.error("Notification WS error", e);
+    </script>
+    {% endif %}
 </body>
 
 </html>

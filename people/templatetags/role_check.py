@@ -13,3 +13,9 @@ def is_student(user):
     if not user or not user.is_authenticated:
         return False
     return getattr(user, 'role', None) == 'student'
+
+@register.filter
+def is_owner(user, resource):
+    if not user or not user.is_authenticated:
+        return False
+    return user == getattr(resource, 'user', None)

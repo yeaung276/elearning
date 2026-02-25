@@ -204,6 +204,7 @@
 
     function hangUp() {
         ws.send(JSON.stringify({ type: 'hang_up' }));
+        window.location = "{% url 'threads' %}";
     }
 
     function clearBoard() {

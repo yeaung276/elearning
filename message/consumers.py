@@ -38,8 +38,8 @@ class MessageConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, code):
         await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
-    async def receive(self, text_data):
-        data = json.loads(text_data)
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data or "{}")
         msg = await database_sync_to_async(Message.objects.create)(
             conversation=self.conversation,
             sender=self.scope["user"],  # type: ignore
@@ -94,8 +94,8 @@ class CallConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
 
-    async def receive(self, text_data):
-        data = json.loads(text_data)
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data or "{}")
         # Broadcast the signaling data to all participants in the call
         await self.channel_layer.group_send(
             self.room_name,

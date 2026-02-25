@@ -25,7 +25,7 @@ from .models import (
     Material,
     Progress
 )
-from people.mixin import TeacherRequiredMixin
+from people.mixin import TeacherRequiredMixin, StudentRequiredMixin
 from notification.signals import material_created, enrollment_created
 
 
@@ -231,7 +231,7 @@ class InstructorOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
         
         return JsonResponse({"ok": True})
     
-class StudentOverviewView(LoginRequiredMixin, View):
+class StudentOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     
@@ -269,7 +269,7 @@ class StudentOverviewView(LoginRequiredMixin, View):
         enrollment.delete()
         return JsonResponse({"ok": True})
         
-class RatingOverviewView(LoginRequiredMixin, View):
+class RatingOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     

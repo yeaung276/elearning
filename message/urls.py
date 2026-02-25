@@ -1,11 +1,11 @@
 from django.urls import path
 
-from .views import message, threads, call
+from .views import message, threads, CallView
 from .consumers import MessageConsumer, CallConsumer
 
 urlpatterns = [
     path("messages", threads, name="threads"),
-    path("messages/call/<int:id>", call, name="call"),
+    path("messages/call/<int:id>", CallView.as_view(), name="call"),
     path("messages/<int:id>", message, name="message"),
 ]
 

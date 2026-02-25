@@ -1,7 +1,11 @@
+import json
+
 from django.urls import reverse
 from django.utils import timezone
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 from course.models import Material, Enrollment
 from people.models import Status
@@ -87,3 +91,21 @@ def handle_enrollment_created(sender, enrollment_id: int, **kwargs):
             notification_type="enrollment",
             redirect_url=reverse("profile", kwargs={"id": enrollment.user.id}) # type: ignore
         )
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        user = self.scope["user"]  # type: ignore
+        if not user.is_authenticated:  # type: ignore
+            await self.close()
+            return
+
+        self.group_name = f"notifications_{user.id}" # type: ignore
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps(event["data"]))

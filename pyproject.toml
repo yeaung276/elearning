@@ -11,3 +11,8 @@ dependencies = [
     "djangorestframework>=3.16.1",
     "pillow>=12.1.1",
 ]
+
+[dependency-groups]
+dev = [
+    "factory-boy>=3.3.3",
+]

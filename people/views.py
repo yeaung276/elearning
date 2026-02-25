@@ -83,16 +83,15 @@ def profile(request, id: int):
     user = get_object_or_404(User, id=id)
     profile = getattr(user, "userprofile", None)
     if not profile:
-        raise Http404
+        raise Http404()
 
     courses = Course.objects.filter(
         Q(user=user) |                          # Own course 
         Q(enrollments__user=user) |             # Enrolled course
-        Q(instructors__user=user)               # Instructor cause
+        Q(instructors__user=user)               # Instructor course
     ).annotate(avg_rating=Avg("ratings__rating")).distinct()
     
-    status = Status.objects.filter(user=user).order_by("-created_at")
-    paginator = Paginator(status, 5)
+    paginator = Paginator(Status.objects.filter(user=user).order_by("-created_at"), 5)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(request, "profile/profile.html", {
@@ -136,7 +135,7 @@ def search_user(request):
     
 
 # Protected route
-class ProfileEditView(View, LoginRequiredMixin):
+class ProfileEditView(LoginRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     
@@ -158,7 +157,7 @@ class ProfileEditView(View, LoginRequiredMixin):
         return render(request, "profile/edit.html", {"form": form})
 
 # ============== Status ======================
-class StatusView(View, LoginRequiredMixin):
+class StatusView(LoginRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     

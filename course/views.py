@@ -2,7 +2,8 @@ import json
 from datetime import date
 
 from django.views import View
-from django.db.models import Q, Avg, Count, Prefetch
+from django.db import connection
+from django.db.models import Q, Avg, Count, Prefetch, Case, When
 from django.utils.timezone import now
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -50,12 +51,31 @@ def explore(request):
 
     courses = Course.objects.filter(status='published')
 
-    # filter
+    # query
     if q:
-        courses = courses.filter(
-            Q(title__icontains=q) | Q(description__icontains=q)
-        )
+        words = q.strip().split()
+        fts_query = ' '.join(words[:-1] + [words[-1] + '*']) if words else q
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT rowid
+                FROM courses_fts
+                WHERE courses_fts MATCH %s
+                ORDER BY bm25(courses_fts, 10.0, 1.0)
+            """, [fts_query])
+            ranked_ids = [row[0] for row in cursor.fetchall()]
+        
+        if ranked_ids:
+            preserved_order = Case(
+                *[When(id=pk, then=pos) for pos, pk in enumerate(ranked_ids)]
+            )
+            courses = courses.filter(id__in=ranked_ids).annotate(
+                search_order=preserved_order
+            ).order_by('search_order')
+        else:
+            courses = courses.none()
 
+    # filter
     if categories:
         courses = courses.filter(category__in=categories)
 

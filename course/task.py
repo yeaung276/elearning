@@ -1,5 +1,5 @@
 from celery import shared_task
 
 @shared_task
-def transcribe():
+def transcribe(video_id):
     print("transcribing")

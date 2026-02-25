@@ -26,6 +26,7 @@ from .models import (
     Material,
     Progress
 )
+from .task import transcribe
 from people.mixin import TeacherRequiredMixin, StudentRequiredMixin, is_owner
 from notification.signals import material_created, enrollment_created
 
@@ -435,6 +436,8 @@ class MaterialView(LoginRequiredMixin, View):
                 material.due_date = form.cleaned_data["due_date"]
                 material.save()
                 material_created.send(sender=None, mid=material.id) # type: ignore
+                print("updated video")
+                transcribe.delay() # type: ignore
                 return redirect("material", cid=course.id, mid=material.id) # type: ignore
             return render(request, "materials/video/form.html", {
                 "form": form,

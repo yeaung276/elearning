@@ -26,17 +26,42 @@ from .models import (
     Material,
     Progress
 )
-from people.mixin import TeacherRequiredMixin, StudentRequiredMixin
+from people.mixin import TeacherRequiredMixin, StudentRequiredMixin, is_owner
 from notification.signals import material_created, enrollment_created
 
 
 User = get_user_model()
 
-def is_enrolled(enrollment):
+def is_enrolled(user, course):
+    enrollment = Enrollment.objects.filter(user=user, course=course).first()
     return enrollment is not None and enrollment.expired_at > date.today() and enrollment.status != 'blocked'
 
-def is_owner(course, user):
-    return course.user == user
+def is_eligible_to_enroll(user, course):
+    today = date.today()
+    
+    # outside of registration date
+    if not (course.registration_start <= today <= course.registration_end):
+        return False
+    
+    # not a student
+    if hasattr(user, 'role') and user.role != 'student':
+        return False
+    
+    enrollment = Enrollment.objects.filter(
+        course=course,
+        user=user,
+    ).first()
+    
+    # blocked student
+    if enrollment and enrollment.status == 'blocked':
+        return False
+    
+    # already enrolled
+    if enrollment and enrollment.expired_at > date.today():
+        return False
+    
+    return True
+    
 
 def is_instructor(course, user):
     return Instructor.objects.filter(course=course, user=user).exists()
@@ -122,7 +147,6 @@ def explore(request):
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
 def course_detail(request, id: int):
-    course = get_object_or_404(Course.objects.annotate(avg_rating=Avg("ratings__rating"), rating_count=Count("ratings__rating")), id=id)
     course = get_object_or_404(
         Course.objects
         .annotate(
@@ -150,10 +174,8 @@ def course_detail(request, id: int):
         id=id
     )
 
-
     if request.user.is_authenticated:
-        enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
-        if is_enrolled(enrollment) or is_owner(course, request.user) or is_instructor(course, request.user):
+        if is_enrolled(request.user, course) or is_owner(request.user, course) or is_instructor(course, request.user):
             return redirect("material_overview", cid=course.id) # type: ignore
     
     if course.status == "draft":
@@ -190,8 +212,7 @@ class MaterialOverviewView(LoginRequiredMixin, View):
     def get(self, request, cid: int):
         course = get_object_or_404(Course, id=cid)
         if request.user.is_authenticated:
-            enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
-            if is_enrolled(enrollment) or is_owner(course, request.user) or is_instructor(course, request.user):
+            if is_enrolled(request.user, course) or is_owner(request.user, course) or is_instructor(course, request.user):
                 form = CourseForm(instance=course, show_status=True, disabled=request.user != course.user)
                 return render(request, "materials/overview.html", {
                     "form": form, 
@@ -295,8 +316,7 @@ class RatingOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
     
     def get(self, request, cid):
         course = get_object_or_404(Course, id=cid)
-        enrollment = Enrollment.objects.filter(user=request.user, course=course).last()
-        if not is_enrolled(enrollment):
+        if not is_enrolled(request.user, course):
             return redirect("material_overview", cid=course.id) # type: ignore
         
         existing = Rating.objects.filter(user=request.user, course=course).last()
@@ -309,8 +329,7 @@ class RatingOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
         
     def post(self, request, cid):
         course = get_object_or_404(Course, id=cid)
-        enrollment = Enrollment.objects.filter(user=request.user, course=course).last()
-        if not is_enrolled(enrollment):
+        if not is_enrolled(request.user, course):
             return redirect("material_overview", cid=course.id) # type: ignore
         
         existing = Rating.objects.filter(user=request.user, course=course).last()
@@ -457,6 +476,12 @@ class MaterialView(LoginRequiredMixin, View):
 def enroll(request, id: int):
     course = get_object_or_404(Course, id=id, status="published")
     
+    if not is_eligible_to_enroll(request.user, course):
+        return Response(
+            {'error': 'You are not eligible.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
     enrollment, created = Enrollment.objects.get_or_create(
         course=course,
         user=request.user,
@@ -466,13 +491,8 @@ def enroll(request, id: int):
         }
     )
     
-    if not created and enrollment.status == 'blocked':
-        return Response(
-            {'error': 'You are blocked from this course'},
-            status=status.HTTP_403_FORBIDDEN
-        )
-        
-    if not created and enrollment.expired_at < now().date():
+    # refresh the enrollment
+    if not created:
         enrollment.expired_at = course.course_end
         enrollment.save()
         

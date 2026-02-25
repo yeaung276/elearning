@@ -4,18 +4,15 @@ register = template.Library()
 
 @register.filter
 def is_teacher(user):
-    if not user or not user.is_authenticated:
-        return False
-    return getattr(user, 'role', None) == 'teacher'
+    from people.mixin import is_teacher
+    return is_teacher(user)
 
 @register.filter
 def is_student(user):
-    if not user or not user.is_authenticated:
-        return False
-    return getattr(user, 'role', None) == 'student'
+    from people.mixin import is_student
+    return is_student(user)
 
 @register.filter
 def is_owner(user, resource):
-    if not user or not user.is_authenticated:
-        return False
-    return user == getattr(resource, 'user', None)
+    from people.mixin import is_owner
+    return is_owner(user, resource)

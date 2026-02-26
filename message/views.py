@@ -8,12 +8,14 @@ from asgiref.sync import async_to_sync
 from rest_framework.decorators import api_view, renderer_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import TemplateHTMLRenderer
+from drf_yasg.utils import swagger_auto_schema
 
 from .models import Conversation, ConversationParticipant
 
 
 User = get_user_model()
 
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @renderer_classes([TemplateHTMLRenderer])
@@ -28,6 +30,7 @@ def threads(request):
         "threads": all_threads,
     })
 
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @renderer_classes([TemplateHTMLRenderer])

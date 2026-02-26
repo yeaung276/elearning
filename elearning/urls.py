@@ -20,10 +20,29 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
+from rest_framework.authentication import SessionAuthentication
+
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view as get_swagger_schema_view
+
+schema_view = get_swagger_schema_view(
+    openapi.Info(
+        title="Elearning API",
+        default_version="1.0.0",
+        description="API documentation Elearning application"
+    ),
+    public=True,
+    authentication_classes=[
+        SessionAuthentication
+    ]
+)
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("course.urls")),
     path("", include("people.urls")),
     path("", include("message.urls")),
-    path("", RedirectView.as_view(pattern_name="dashboard", permanent=False))
+    path("", RedirectView.as_view(pattern_name="dashboard", permanent=False)),
+    path("docs/", schema_view.with_ui("swagger", cache_timeout=10), name="docs"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

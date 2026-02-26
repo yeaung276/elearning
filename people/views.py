@@ -1,8 +1,12 @@
 from datetime import timedelta
 
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes, permission_classes
 from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.permissions import IsAdminUser
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.filters import SearchFilter
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect
@@ -14,17 +18,21 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Avg
 from django.utils import timezone
 from django.views import View
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
-from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
-from .models import UserProfile, Status
 from course.models import Course, Material
 from notification.signals import status_created
 from notification.models import Notifications
+from .forms import RegistrationForm, ProfileUpdateForm, StatusForm
+from .models import UserProfile, Status
+from .serializers import UserSearchSerializer, UserProfileSerializer
 
 
 User = get_user_model()
 
 # ============ Dashboard ===================
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(["GET"])
 @login_required(login_url='/login/')
 @renderer_classes([TemplateHTMLRenderer])
@@ -77,6 +85,7 @@ class RegisterView(View):
 
 # ============== Profile ====================
 # Public route
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
 def profile(request, id: int):
@@ -101,6 +110,7 @@ def profile(request, id: int):
     })
 
 # Protected route
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(["GET"])
 @login_required(login_url="/login/")
 def search_user(request):
@@ -175,3 +185,42 @@ class StatusView(LoginRequiredMixin, View):
             return redirect("dashboard")
         
         return render(request, "status/new.html", {"form": form})
+    
+    
+# ================= SWAGGER =========================
+class UserSearchPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+    
+class UserSearchView(ListAPIView):
+    serializer_class = UserSearchSerializer
+    permission_classes = [IsAdminUser]
+    filter_backends = [SearchFilter]
+    search_fields = ['username', 'userprofile__name']
+    pagination_class = UserSearchPagination
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('search', openapi.IN_QUERY, type=openapi.TYPE_STRING, description='Search by username or name'),
+            openapi.Parameter('role', openapi.IN_QUERY, type=openapi.TYPE_STRING, description='Filter by role', enum=['teacher', 'student']),
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return User.objects.filter(
+            role=self.request.GET.get('role', 'teacher')
+        ).select_related('userprofile').distinct()
+
+
+class UserDetailView(RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAdminUser]
+    queryset = UserProfile.objects.select_related("user")
+    
+    def get_object(self):
+       user = get_object_or_404(User, id=self.kwargs["id"])
+       profile = get_object_or_404(UserProfile, user=user)
+       return profile

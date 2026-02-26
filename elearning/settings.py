@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "message",
     "notification",
     "daphne",
+    "drf_yasg",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

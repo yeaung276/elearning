@@ -11,7 +11,9 @@ from .views import (
     RatingOverviewView,
     ModuleView,
     MaterialView,
-    marked_as_complete
+    marked_as_complete,
+    CourseListView,
+    CourseDetailView
 )
 
 urlpatterns = [
@@ -26,4 +28,7 @@ urlpatterns = [
     path('course/<int:cid>/instructor/', InstructorOverviewView.as_view(), name="instructor_overview"),
     path('course/<int:cid>/student/', StudentOverviewView.as_view(), name="student_overview"),
     path('course/<int:cid>/rating/', RatingOverviewView.as_view(), name="rating_overview"),
+    
+    path('api/courses', CourseListView.as_view(), name="course_search_api"),
+    path('api/courses/<int:id>', CourseDetailView.as_view(), name="course_detail_api")
 ]

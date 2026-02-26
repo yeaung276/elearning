@@ -14,7 +14,12 @@ from rest_framework.decorators import api_view, renderer_classes, permission_cla
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework import status
+from rest_framework.permissions import IsAdminUser
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .forms import CourseForm, RatingForm, VideoMaterialForm, ReadingMaterialForm
 from .models import (
@@ -27,6 +32,7 @@ from .models import (
     Progress
 )
 from .task import transcribe
+from .serializers import CourseSearchSerializer, CourseDetailSerializer
 from people.mixin import TeacherRequiredMixin, StudentRequiredMixin, is_owner
 from notification.signals import material_created, enrollment_created
 
@@ -67,7 +73,9 @@ def is_eligible_to_enroll(user, course):
 def is_instructor(course, user):
     return Instructor.objects.filter(course=course, user=user).exists()
 
+# =============== courses ==========================
 
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(['GET'])
 @renderer_classes([TemplateHTMLRenderer])
 def explore(request):
@@ -113,11 +121,11 @@ def explore(request):
 
     # Sort
     if sort_by == 'rating':
-        courses = courses.order_by('-avg_rating', '-enrollment_count')
+        courses = courses.order_by('-avg_rating')
     elif sort_by == 'newest':
         courses = courses.order_by('-created_at')
-    else:
-        courses = courses.order_by('-enrollment_count', '-avg_rating')
+    elif sort_by == 'popular':
+        courses = courses.order_by('-enrollment_count')
 
     # Paginate
     page = Paginator(courses, 9).get_page(request.GET.get("page"))
@@ -144,7 +152,8 @@ def explore(request):
         'selected_categories': categories,
         'sort_by': sort_by,
     })
-    
+
+@swagger_auto_schema(methods=["GET"], auto_schema=None)
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
 def course_detail(request, id: int):
@@ -205,7 +214,8 @@ class CourseCreateView(LoginRequiredMixin, TeacherRequiredMixin, View):
             return redirect("material_overview", cid=course.id)
         
         return render(request, "create.html", {"form": form})
-    
+
+# ============= course materials ===================
 class MaterialOverviewView(LoginRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
@@ -237,112 +247,6 @@ class MaterialOverviewView(LoginRequiredMixin, View):
             "course": course
         })
 
-class InstructorOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
-    login_url = "login"
-    redirect_field_name = None
-    
-    def get(self, request, cid: int):
-        course = get_object_or_404(Course, id=cid)
-        if course.user != request.user:
-            return redirect("material_overview", cid=course.id) # type: ignore
-        
-        instructors = Instructor.objects.filter(course=course).all()
-        return render(request, "materials/instructor.html", {
-            "course": course,
-            "instructors": instructors,
-        })
-        
-    def post(self, request, cid: int):
-        course = get_object_or_404(Course, id=cid)
-        if course.user != request.user:
-            return redirect("material_overview", cid=course.id) # type: ignore
-        
-        user = get_object_or_404(User, id=request.POST.get("user_id"))
-        
-        Instructor.objects.get_or_create(user=user, course=course)
-        
-        return redirect("instructor_overview", cid=course.id) # type: ignore
-    
-    def delete(self, request, cid: int):
-        course = get_object_or_404(Course, id=cid)
-        if course.user != request.user:
-            return JsonResponse({"error": "Forbidden"}, status=403)
-        data = json.loads(request.body)
-        instructor = get_object_or_404(Instructor, id=data.get("instructor_id"))
-        instructor.delete()
-        
-        return JsonResponse({"ok": True})
-    
-class StudentOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
-    login_url = "login"
-    redirect_field_name = None
-    
-    def get(self, request, cid: int):
-        course = get_object_or_404(Course, id=cid)
-        enrollments = Enrollment.objects.filter(course=course)
-        q = request.GET.get("q", "").strip()
-        if q:
-            enrollments = enrollments.filter(
-                Q(user__username__icontains=q) | Q(user__userprofile__name__icontains=q)
-        )
-        return render(request, "materials/student.html", {
-            "enrollments": enrollments,
-            "course": course,
-        })
-        
-    def patch(self, request, cid: int):
-        course = get_object_or_404(Course, id=cid)
-        if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
-            return JsonResponse({"error": "Only teacher can block or unblock a student."})
-        data = json.loads(request.body)
-        
-        enrollment = get_object_or_404(Enrollment, id=data["enrollment_id"], course=course)
-        enrollment.status = "blocked" if data["blocked"] else "enrolled"
-        enrollment.save()
-        return JsonResponse({"ok": True})
-        
-    def delete(self, request, cid: int):
-        course = get_object_or_404(Course, id=cid)
-        if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
-            return JsonResponse({"error": "Only teacher can remove a student."}, status=401)
-        
-        data = json.loads(request.body)
-        enrollment = get_object_or_404(Enrollment, id=data["enrollment_id"], course=course)
-        enrollment.delete()
-        return JsonResponse({"ok": True})
-        
-class RatingOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
-    login_url = "login"
-    redirect_field_name = None
-    
-    def get(self, request, cid):
-        course = get_object_or_404(Course, id=cid)
-        if not is_enrolled(request.user, course):
-            return redirect("material_overview", cid=course.id) # type: ignore
-        
-        existing = Rating.objects.filter(user=request.user, course=course).last()
-        form = RatingForm(instance=existing)
-
-        return render(request, "materials/rating.html", {
-            "course": course,
-            "form": form,
-        })
-        
-    def post(self, request, cid):
-        course = get_object_or_404(Course, id=cid)
-        if not is_enrolled(request.user, course):
-            return redirect("material_overview", cid=course.id) # type: ignore
-        
-        existing = Rating.objects.filter(user=request.user, course=course).last()
-        form = RatingForm(request.POST, instance=existing)
-        if form.is_valid():
-            rating = form.save(commit=False)
-            rating.user = request.user
-            rating.course = course
-            rating.save()
-
-        return redirect("material_overview", cid=course.id) # type: ignore
-        
 class ModuleView(LoginRequiredMixin, TeacherRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
@@ -473,6 +377,116 @@ class MaterialView(LoginRequiredMixin, View):
         material.delete()
         return JsonResponse({"ok": True})
 
+# ================= course instructors ======================
+class InstructorOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
+    login_url = "login"
+    redirect_field_name = None
+    
+    def get(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if course.user != request.user:
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        instructors = Instructor.objects.filter(course=course).all()
+        return render(request, "materials/instructor.html", {
+            "course": course,
+            "instructors": instructors,
+        })
+        
+    def post(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if course.user != request.user:
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        user = get_object_or_404(User, id=request.POST.get("user_id"))
+        
+        Instructor.objects.get_or_create(user=user, course=course)
+        
+        return redirect("instructor_overview", cid=course.id) # type: ignore
+    
+    def delete(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if course.user != request.user:
+            return JsonResponse({"error": "Forbidden"}, status=403)
+        data = json.loads(request.body)
+        instructor = get_object_or_404(Instructor, id=data.get("instructor_id"))
+        instructor.delete()
+        
+        return JsonResponse({"ok": True})
+
+# ================== course students ==========================
+class StudentOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
+    login_url = "login"
+    redirect_field_name = None
+    
+    def get(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        enrollments = Enrollment.objects.filter(course=course)
+        q = request.GET.get("q", "").strip()
+        if q:
+            enrollments = enrollments.filter(
+                Q(user__username__icontains=q) | Q(user__userprofile__name__icontains=q)
+        )
+        return render(request, "materials/student.html", {
+            "enrollments": enrollments,
+            "course": course,
+        })
+        
+    def patch(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
+            return JsonResponse({"error": "Only teacher can block or unblock a student."})
+        data = json.loads(request.body)
+        
+        enrollment = get_object_or_404(Enrollment, id=data["enrollment_id"], course=course)
+        enrollment.status = "blocked" if data["blocked"] else "enrolled"
+        enrollment.save()
+        return JsonResponse({"ok": True})
+        
+    def delete(self, request, cid: int):
+        course = get_object_or_404(Course, id=cid)
+        if not Instructor.objects.filter(user=request.user, course=course).exists() and request.user != course.user:
+            return JsonResponse({"error": "Only teacher can remove a student."}, status=401)
+        
+        data = json.loads(request.body)
+        enrollment = get_object_or_404(Enrollment, id=data["enrollment_id"], course=course)
+        enrollment.delete()
+        return JsonResponse({"ok": True})
+        
+class RatingOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
+    login_url = "login"
+    redirect_field_name = None
+    
+    def get(self, request, cid):
+        course = get_object_or_404(Course, id=cid)
+        if not is_enrolled(request.user, course):
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        existing = Rating.objects.filter(user=request.user, course=course).last()
+        form = RatingForm(instance=existing)
+
+        return render(request, "materials/rating.html", {
+            "course": course,
+            "form": form,
+        })
+        
+    def post(self, request, cid):
+        course = get_object_or_404(Course, id=cid)
+        if not is_enrolled(request.user, course):
+            return redirect("material_overview", cid=course.id) # type: ignore
+        
+        existing = Rating.objects.filter(user=request.user, course=course).last()
+        form = RatingForm(request.POST, instance=existing)
+        if form.is_valid():
+            rating = form.save(commit=False)
+            rating.user = request.user
+            rating.course = course
+            rating.save()
+
+        return redirect("material_overview", cid=course.id) # type: ignore
+        
+
+@swagger_auto_schema(methods=["POST"], auto_schema=None)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def enroll(request, id: int):
@@ -502,6 +516,7 @@ def enroll(request, id: int):
     return Response({'message': 'Enroll successfully'}, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(methods=["POST"], auto_schema=None)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def marked_as_complete(request, cid: int, mid: int):
@@ -512,3 +527,97 @@ def marked_as_complete(request, cid: int, mid: int):
         
     return redirect("material", cid=cid, mid=mid)
     
+# ================ swagger ======================================
+class CoursePagination(PageNumberPagination):
+    page_size = 9
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+class CourseListView(ListAPIView):
+    serializer_class = CourseSearchSerializer
+    pagination_class = CoursePagination
+    permission_classes = [IsAdminUser]
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('q', openapi.IN_QUERY, type=openapi.TYPE_STRING, description='Search courses by keyword'),
+            openapi.Parameter('sort_by', openapi.IN_QUERY, type=openapi.TYPE_STRING, description='Sort course by', enum=['rating', 'newest', 'popular']),
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+    def get_queryset(self):
+        params = self.request.query_params
+        q = params.get('q', '').strip()
+        sort_by = params.get('sort_by', 'popular')
+
+        courses = Course.objects.filter(status='published')
+
+        if q:
+            words = q.split()
+            fts_query = ' '.join(words[:-1] + [words[-1] + '*']) if words else q
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT rowid FROM courses_fts
+                    WHERE  courses_fts MATCH %s
+                    ORDER  BY bm25(courses_fts, 10.0, 1.0)
+                    """,
+                    [fts_query],
+                )
+                ranked_ids = [row[0] for row in cursor.fetchall()]
+
+            if not ranked_ids:
+                return Course.objects.none()
+
+            preserved_order = Case(
+                *[When(id=pk, then=pos) for pos, pk in enumerate(ranked_ids)]
+            )
+            courses = (
+                courses
+                .filter(id__in=ranked_ids)
+                .annotate(search_order=preserved_order)
+                .order_by('search_order')
+            )
+
+        courses = courses.annotate(
+            avg_rating       = Avg('ratings__rating'),
+            enrollment_count = Count('enrollments', distinct=True),
+            rating_count     = Count('ratings', distinct=True),
+        )
+
+        if sort_by == 'rating':
+            courses = courses.order_by('-avg_rating')
+        elif sort_by == 'newest':
+            courses = courses.order_by('-created_at')
+        elif sort_by == 'popular':
+            courses = courses.order_by('-enrollment_count')
+
+        return courses
+    
+class CourseDetailView(RetrieveAPIView):
+    serializer_class = CourseDetailSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field       = 'id'
+
+    def get_queryset(self):
+        return (
+            Course.objects.filter(status='published')
+            .annotate(
+                avg_rating     = Avg('ratings__rating'),
+                rating_count   = Count('ratings', distinct=True),
+            )
+            .prefetch_related(
+                Prefetch(
+                    'modules',
+                    queryset=Module.objects.annotate(
+                        video_count = Count('materials', filter=Q(materials__type='video')),
+                        reading_count   = Count('materials', filter=Q(materials__type='reading')),
+                    )
+                ),
+                'ratings',
+            )
+        )

@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
 
-from .forms import CourseForm
+from .forms import CourseForm, RatingForm
 from .models import Course, Enrollment, Instructor, Module, Material, Progress, Rating
 from .views import is_enrolled, is_eligible_to_enroll
 
@@ -220,12 +220,6 @@ class MaterialOverviewViewTest(TestCase):
 
 
 class StudentOverviewPermissionTest(TestCase):
-    """
-    BUG: StudentOverviewView uses StudentRequiredMixin (role=student).
-    This means: the course owner (teacher) is blocked from their own student
-    list, while any unrelated student can freely browse it.
-    """
-
     def setUp(self):
         self.owner = TeacherFactory()
         self.course = CourseFactory(user=self.owner)
@@ -245,11 +239,6 @@ class StudentOverviewPermissionTest(TestCase):
 
 
 class MarkedAsCompleteTest(TestCase):
-    """
-    BUG: The view uses Enrollment.objects.filter(...).exists() instead of
-    is_enrolled(), so blocked and expired students can still record progress.
-    """
-
     def setUp(self):
         self.student = UserFactory(role="student")
         self.course = CourseFactory()
@@ -288,16 +277,15 @@ class RatingViewTest(TestCase):
     def _url(self):
         return reverse("rating_overview", kwargs={"cid": self.course.id})
 
-    def test_second_rating_adds_new_row_and_last_is_used(self):
+    def test_second_rating_updates_existing_row_in_place(self):
         self.client.force_login(self.student)
         self.client.post(self._url(), {"rating": 3, "text": "It was okay I guess."})
         self.client.post(self._url(), {"rating": 5, "text": "Actually it was amazing!"})
         self.assertEqual(
-            Rating.objects.filter(user=self.student, course=self.course).count(), 2
+            Rating.objects.filter(user=self.student, course=self.course).count(), 1
         )
-        latest = Rating.objects.filter(user=self.student, course=self.course).last()
-        self.assertIsNotNone(latest)
-        self.assertEqual(latest.rating, 5)  # type: ignore[union-attr]
+        rating = Rating.objects.get(user=self.student, course=self.course)
+        self.assertEqual(rating.rating, 5)
 
 
 class ModuleDeleteCascadeTest(TestCase):
@@ -341,4 +329,156 @@ class InstructorManagementTest(TestCase):
                 user=self.new_instructor, course=self.course
             ).count(),
             1,
+        )
+
+
+class CourseFormRemainingValidationTest(TestCase):
+    def _data(self, **overrides):
+        data = {
+            "title": fake.sentence(nb_words=4),
+            "category": "computer-science",
+            "description": fake.paragraph(),
+            "registration_start": _today(0).isoformat(),
+            "registration_end": _today(5).isoformat(),
+            "course_start": _today(10).isoformat(),
+            "course_end": _today(100).isoformat(),
+        }
+        data.update(overrides)
+        return data
+
+    def test_course_end_before_course_start_invalid(self):
+        form = CourseForm(self._data(
+            course_start=_today(50).isoformat(),
+            course_end=_today(10).isoformat(),
+        ))
+        self.assertFalse(form.is_valid())
+        self.assertIn("course_end", form.errors)
+
+    def test_registration_end_after_course_start_invalid(self):
+        form = CourseForm(self._data(
+            registration_end=_today(15).isoformat(),
+            course_start=_today(10).isoformat(),
+        ))
+        self.assertFalse(form.is_valid())
+        self.assertIn("registration_end", form.errors)
+
+
+class EnrollmentWindowTest(TestCase):
+    def setUp(self):
+        self.student = UserFactory(role="student")
+
+    def test_student_before_registration_window_not_eligible(self):
+        future_course = CourseFactory(
+            registration_start=_today(5),
+            registration_end=_today(10),
+            course_start=_today(15),
+            course_end=_today(100),
+        )
+        self.assertFalse(is_eligible_to_enroll(self.student, future_course))
+
+    def test_student_after_registration_window_not_eligible(self):
+        past_course = CourseFactory(
+            registration_start=_today(-20),
+            registration_end=_today(-5),
+            course_start=_today(-3),
+            course_end=_today(100),
+        )
+        self.assertFalse(is_eligible_to_enroll(self.student, past_course))
+
+
+class CourseCreateViewTest(TestCase):
+    URL = "/course/new/"
+
+    def _post_data(self):
+        return {
+            "title": fake.sentence(nb_words=4),
+            "category": "computer-science",
+            "description": fake.paragraph(),
+            "registration_start": _today(0).isoformat(),
+            "registration_end": _today(5).isoformat(),
+            "course_start": _today(10).isoformat(),
+            "course_end": _today(100).isoformat(),
+        }
+
+    def test_student_is_blocked_from_course_creation(self):
+        self.client.force_login(UserFactory(role="student"))
+        response = self.client.post(self.URL, self._post_data())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Course.objects.count(), 0)
+
+    def test_teacher_creates_course_and_is_redirected_to_overview(self):
+        teacher = TeacherFactory()
+        self.client.force_login(teacher)
+        response = self.client.post(self.URL, self._post_data())
+        course = Course.objects.filter(user=teacher).first()
+        self.assertIsNotNone(course)
+        self.assertRedirects(
+            response,
+            reverse("material_overview", kwargs={"cid": course.id}),  # type: ignore[union-attr]
+            fetch_redirect_response=False,
+        )
+
+
+class EnrollAuthAndFirstEnrollTest(TestCase):
+    def setUp(self):
+        self.student = UserFactory(role="student")
+        self.course = CourseFactory()
+
+    def _url(self):
+        return reverse("enroll", kwargs={"id": self.course.id})
+
+    def test_unauthenticated_cannot_enroll(self):
+        response = self.client.post(self._url())
+        self.assertGreaterEqual(response.status_code, 400)
+        self.assertEqual(Enrollment.objects.count(), 0)
+
+    def test_first_enrollment_is_created_with_correct_expiry(self):
+        self.client.force_login(self.student)
+        with patch("course.views.enrollment_created.send"):
+            response = self.client.post(self._url())
+        self.assertEqual(response.status_code, 200)
+        enrollment = Enrollment.objects.get(user=self.student, course=self.course)
+        self.assertEqual(enrollment.status, "enrolled")
+        self.assertEqual(enrollment.expired_at, self.course.course_end)
+
+
+class RatingFormTest(TestCase):
+    def _data(self, **overrides):
+        data = {"rating": 4, "text": "Really enjoyed this course."}
+        data.update(overrides)
+        return data
+
+    def test_valid_form(self):
+        form = RatingForm(self._data())
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_rating_zero_is_invalid(self):
+        form = RatingForm(self._data(rating=0))
+        self.assertFalse(form.is_valid())
+        self.assertIn("rating", form.errors)
+
+    def test_rating_six_is_invalid(self):
+        form = RatingForm(self._data(rating=6))
+        self.assertFalse(form.is_valid())
+        self.assertIn("rating", form.errors)
+
+    def test_review_shorter_than_10_chars_is_invalid(self):
+        form = RatingForm(self._data(text="Too short"))  # 9 chars
+        self.assertFalse(form.is_valid())
+        self.assertIn("text", form.errors)
+
+class RatingNonEnrolledRedirectTest(TestCase):
+    def setUp(self):
+        self.student = UserFactory(role="student")
+        self.course = CourseFactory()
+
+    def test_non_enrolled_student_redirected_to_material_overview(self):
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("rating_overview", kwargs={"cid": self.course.id})
+        )
+        self.assertRedirects(
+            response,
+            reverse("material_overview", kwargs={"cid": self.course.id}),
+            fetch_redirect_response=False,
         )

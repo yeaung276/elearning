@@ -19,10 +19,6 @@ fake = Faker()
 MOCK_CHANNEL = "notification.consumers.get_channel_layer"
 MOCK_ASYNC = "notification.consumers.async_to_sync"
 
-
-# ── Factories ──────────────────────────────────────────────────────────────
-
-
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
@@ -95,9 +91,6 @@ class StatusFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     text = factory.LazyFunction(lambda: fake.text(max_nb_chars=200))
-
-
-# ── Tests ──────────────────────────────────────────────────────────────────
 
 
 class NotificationModelTest(TestCase):

@@ -1,11 +1,11 @@
 from django.db import models
 from django.conf import settings
 
-
+# Thread in the report
 class Conversation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
-
+# ThreadParticipant in the report
 class ConversationParticipant(models.Model):
     conversation = models.ForeignKey(
         Conversation,
@@ -22,7 +22,7 @@ class ConversationParticipant(models.Model):
     class Meta:
         unique_together = ("conversation", "user")
 
-
+# ThreadMessage in the report
 class Message(models.Model):
     conversation = models.ForeignKey(
         Conversation,

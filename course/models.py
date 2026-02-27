@@ -96,6 +96,7 @@ class VideoMaterial(models.Model):
     path = models.FileField(upload_to='videos/')
     title = models.CharField(max_length=255, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    transcript = models.TextField(blank=True)
 
 
 class ReadingMaterial(models.Model):

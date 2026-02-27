@@ -415,7 +415,7 @@ class InstructorOverviewView(LoginRequiredMixin, TeacherRequiredMixin, View):
         return JsonResponse({"ok": True})
 
 # ================== course students ==========================
-class StudentOverviewView(LoginRequiredMixin, StudentRequiredMixin, View):
+class StudentOverviewView(LoginRequiredMixin, View):
     login_url = "login"
     redirect_field_name = None
     

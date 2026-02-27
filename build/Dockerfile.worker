@@ -1,0 +1,17 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install uv
+
+COPY pyproject.toml .
+RUN uv pip install --system -r pyproject.toml
+
+# Pre-download Whisper model at build time
+RUN python -c "import whisper; whisper.load_model('base')"
+
+CMD ["uv", "run", "celery", "-A", "elearning", "worker", "--loglevel=info"]

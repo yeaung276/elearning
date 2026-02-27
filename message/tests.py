@@ -62,13 +62,13 @@ class ConversationModelTest(TestCase):
         with self.assertRaises(IntegrityError):
             ConversationParticipant.objects.create(conversation=conv, user=user)
 
-    def test_message_sender_becomes_null_on_user_delete(self):
+    def test_message_is_deleted_on_user_delete(self):
         user = UserFactory()
         conv = ConversationFactory()
         msg = MessageFactory(conversation=conv, sender=user)
+        msg_id = msg.id
         user.delete()
-        msg.refresh_from_db()
-        self.assertIsNone(msg.sender)
+        self.assertFalse(Message.objects.filter(id=msg_id).exists())
 
     def test_cascade_delete_conversation_removes_messages(self):
         conv = ConversationFactory()

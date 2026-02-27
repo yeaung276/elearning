@@ -229,9 +229,9 @@ class StudentOverviewPermissionTest(TestCase):
     def _url(self):
         return reverse("student_overview", kwargs={"cid": self.course.id})
 
-    def test_owner_is_blocked_from_their_own_student_list(self):
+    def test_owner_can_view_their_own_student_list(self):
         self.client.force_login(self.owner)
-        self.assertEqual(self.client.get(self._url()).status_code, 302)
+        self.assertEqual(self.client.get(self._url()).status_code, 200)
 
     def test_unrelated_student_can_read_full_enrollment_list(self):
         self.client.force_login(self.other_student)

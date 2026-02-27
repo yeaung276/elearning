@@ -26,7 +26,15 @@ SECRET_KEY = 'django-insecure-myd2s)e^b!(hac_(j-yebu)a^1pu*aw5z9!9-8)_32)j&2ai($
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    'elearning-qzki.onrender.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "https://elearning-qzki.onrender.com",
+]
 
 
 # Application definition

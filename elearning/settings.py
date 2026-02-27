@@ -79,10 +79,12 @@ ASGI_APPLICATION = 'elearning.asgi.application'
 
 # Channels
 CHANNEL_LAYERS = {
-    'BACKEND': 'channels_redis.core.RedisChannelLayer',
-    'CONFIG': {
-        "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379/0')],
-    },
+    'default': {        
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379/0')],
+        },
+    }
 }
 
 # Database

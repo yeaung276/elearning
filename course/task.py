@@ -11,7 +11,7 @@ def transcribe(video_id):
     model = whisper.load_model("base")
     result = model.transcribe(video.path.path)
     
-    video.transcript = result["text"][:255]
+    video.transcript = result["text"]
     video.save()
     
     return result["text"]

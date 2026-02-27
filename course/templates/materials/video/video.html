@@ -26,6 +26,10 @@
                     Your browser does not support the video tag.
                 </video>
             </div>
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-700 leading-relaxed">
+                <h3 class="font-semibold text-gray-900 mb-2">Transcript</h3>
+                {{ material.video.first.transcript }}
+            </div>
             {% else %}
             <div class="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-6">
                 <div class="text-center text-gray-500">

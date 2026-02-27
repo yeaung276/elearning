@@ -5,6 +5,7 @@
 {% block content %}
 <!-- Header -->
 <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+    <audio id="remote-audio" autoplay hidden></audio>
     <div class="flex items-center space-x-3">
         {% if target.userprofile.picture %}
         <img src="{{ target.userprofile.picture.url }}" alt="Profile picture"
@@ -159,7 +160,8 @@
         }
 
         if (data.type === 'call_ended') {
-
+            rtc.close();
+            window.location = "{% url 'threads' %}";
         }
 
         if (data.type === 'draw_point') {
@@ -186,6 +188,10 @@
         }
     };
 
+    rtc.ontrack = (e) => {
+        document.getElementById('remote-audio').srcObject = e.streams[0];
+    };
+    
     ws.onopen = () => {
         ws.send(JSON.stringify({ type: 'ping' }));
     };
@@ -203,6 +209,7 @@
     }
 
     function hangUp() {
+        rtc.close();
         ws.send(JSON.stringify({ type: 'hang_up' }));
         window.location = "{% url 'threads' %}";
     }

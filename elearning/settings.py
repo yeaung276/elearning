@@ -78,8 +78,12 @@ WSGI_APPLICATION = 'elearning.wsgi.application'
 ASGI_APPLICATION = 'elearning.asgi.application'
 
 # Channels
+STANDALONE_MODE = os.environ.get('STANDALONE_MODE', 'true') == 'true'
+
 CHANNEL_LAYERS = {
-    'default': {        
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    } if STANDALONE_MODE else {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379/0')],

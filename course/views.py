@@ -341,7 +341,7 @@ class MaterialView(LoginRequiredMixin, View):
                 material.due_date = form.cleaned_data["due_date"]
                 material.save()
                 material_created.send(sender=None, mid=material.id) # type: ignore
-                if os.environ.get('ENABLE_CELERY') == "true":
+                if os.environ.get('STANDALONE_MODE') == "false":
                     transcribe.delay(video_id=form.instance.id) # type: ignore
                 return redirect("material", cid=course.id, mid=material.id) # type: ignore
             return render(request, "materials/video/form.html", {

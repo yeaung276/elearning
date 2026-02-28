@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load humanize %}
+{% load role_check %}
 
 {% block title %}{{ course.title }} - ELearning{% endblock %}
 
@@ -11,7 +12,9 @@
 
             <!-- Profile Header -->
             <div class="bg-white rounded-lg shadow-sm p-8 mb-8 pt-4">
+                {% if user|is_owner:profile %}
                 <a href="/profile/edit" class="block text-right text-blue-600 hover:underline">Edit</a>
+                {% endif %}
                 <div class="flex items-start space-x-8">
                     <!-- Profile Picture -->
                     <div class="w-32 h-32 rounded-full overflow-hidden flex-shrink-0">
@@ -29,7 +32,7 @@
                     <div class="flex-1">
                         <div class="flex items-start justify-between mb-2">
                             <h1 class="text-3xl font-bold text-gray-900">{{ profile.name }}</h1>
-                            {% if profile.user != user %}
+                            {% if not user|is_owner:profile %}
                             <a href="{% url 'message' id=profile.id %}"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition flex items-center space-x-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

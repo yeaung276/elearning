@@ -210,7 +210,7 @@
 
     function hangUp() {
         rtc.close();
-        ws.send(JSON.stringify({ type: 'hang_up' }));
+        ws.send(JSON.stringify({ type: 'call_ended' }));
         window.location = "{% url 'threads' %}";
     }
 

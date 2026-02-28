@@ -80,9 +80,9 @@
             container.appendChild(el);
         }
 
-        const ws = new WebSocket(`ws://${location.host}/ws/notification/`);
+        const notiWs = new WebSocket(`ws://${location.host}/ws/notification/`);
 
-        ws.onmessage = (event) => {
+        notiWs.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
                 showNotification(data);
